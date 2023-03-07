@@ -8,7 +8,11 @@ import { MongooseModule } from '@nestjs/mongoose';
     {
       provide: 'MONGO',
       useFactory: async () => {
-        const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/?authMechanism=DEFAULT`;
+        const uri = `mongodb://${process.env.DB_USER}:${encodeURIComponent(
+          process.env.DB_PASS,
+        )}@${process.env.DB_HOST}:${
+          process.env.DB_PORT
+        }/?authMechanism=DEFAULT`;
         const client = new MongoClient(uri);
 
         await client.connect();
