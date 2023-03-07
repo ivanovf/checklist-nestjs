@@ -16,9 +16,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/models/role.model';
 
 @ApiTags('Items')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
@@ -28,10 +31,11 @@ export class ItemsController {
     return this.itemsService.create(createItemDto);
   }
 
+  @Roles(Role.ADMIN)
   @Get('all')
   findAll(
-    @Query('limit', ParseIntPipe) limit = 10,
-    @Query('offset', ParseIntPipe) offset = 0,
+    @Query('limit', ParseIntPipe) limit?: 10,
+    @Query('offset', ParseIntPipe) offset?: 0,
   ) {
     return this.itemsService.findAll(limit, offset);
   }

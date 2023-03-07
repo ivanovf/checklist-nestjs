@@ -25,10 +25,14 @@ export class AuthService {
   }
 
   generateJWT(user: User) {
-    const payload = { name: user.email, sub: user.id };
+    const payload = { name: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
       user,
-    }
+    };
+  }
+
+  async validateToken(token: string) {
+    return await this.jwtService.verifyAsync(token);
   }
 }

@@ -6,7 +6,6 @@ import {
   Param,
   Delete,
   Put,
-  ParseIntPipe,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +14,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { FilterListDto } from 'src/filter_dto/filter-list.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Reservations')
@@ -28,11 +28,11 @@ export class ReservationsController {
   }
 
   @Get('all')
-  findAll(
-    @Query('limit', ParseIntPipe) limit = 10,
-    @Query('offset', ParseIntPipe) offset = 0,
-  ) {
-    return this.reservationsService.findAll(limit, offset);
+  findAll(@Query() params: FilterListDto) {
+    return this.reservationsService.findAll(
+      params.limit ?? 10,
+      params.offset ?? 0,
+    );
   }
 
   @Get(':id')
