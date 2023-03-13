@@ -4,10 +4,10 @@ export class FilterListDto {
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  limit: number;
+  limit = 10;
 
   @IsNumber()
   @Min(0)
   @IsOptional()
-  offset: number;
+  offset = 0;
 }

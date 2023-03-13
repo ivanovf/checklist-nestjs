@@ -7,10 +7,16 @@ import { Item, ItemSchema } from 'src/items/entities/item.entity';
 })
 export class Reservation extends Document {
   @Prop({ required: true, type: Date, default: Date.now })
-  date: Date;
+  dateIni: Date;
+
+  @Prop({ required: true, type: Date, default: Date.now })
+  dateEnd: Date;
 
   @Prop({ required: true })
   type: string;
+
+  @Prop({ default: false })
+  validated: boolean;
 
   @Prop({ required: true })
   contact: string;

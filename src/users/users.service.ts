@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, NotAcceptableException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -20,7 +20,28 @@ export class UsersService {
     return this.skipPassword(created);
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto?.changePassword) {
+      if (updateUserDto?.password && updateUserDto?.currentPassword) {
+        const user = await this.findOne(id, false);
+        const isMatch = await bcrypt.compare(
+          updateUserDto.currentPassword,
+          user.password,
+        );
+
+        if (!isMatch) {
+          throw new NotAcceptableException('The password does not match.');
+        } else {
+          updateUserDto.password = await bcrypt.hash(
+            updateUserDto.password,
+            10,
+          );
+        }
+      } else {
+        throw new NotAcceptableException('No new password provide');
+      }
+    }
+
     const updated = this.userModel
       .findByIdAndUpdate(id, { $set: updateUserDto }, { new: true })
       .exec();
@@ -28,6 +49,7 @@ export class UsersService {
     if (!updated) {
       throw new NotFoundException(id);
     }
+    delete (await updated).password;
     return updated;
   }
 
@@ -51,13 +73,18 @@ export class UsersService {
     return filtered;
   }
 
-  findOne(id: string) {
-    const user = this.userModel.findById(id);
+  async findOne(id: string, skipPass = true) {
+    const user = await this.userModel.findById(id);
 
     if (!user) {
       throw new NotFoundException(`user #${id} not found`);
     }
-    return user;
+
+    if (skipPass) {
+      return this.skipPassword(user);
+    } else {
+      return user;
+    }
   }
 
   async findByEmail(email: string) {

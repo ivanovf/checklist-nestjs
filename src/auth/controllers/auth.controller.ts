@@ -26,16 +26,17 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('validate')
-  validateToken(@Headers('authorization') authHeader: string) {
+  async validateToken(@Headers('authorization') authHeader: string) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Invalid authorization header');
     }
 
     const token = authHeader.substring('Bearer '.length);
     try {
-      const decoded = this.authService.validateToken(token);
+      const decoded = await this.authService.validateToken(token);
+      console.log(decoded);
       // if the token is valid, the decoded data will be returned
-      return { message: 'You have access to this protected resource', decoded };
+      return { access: true, user: decoded };
     } catch (err) {
       // if the token is invalid, an error will be thrown
       throw new UnauthorizedException('Invalid token');

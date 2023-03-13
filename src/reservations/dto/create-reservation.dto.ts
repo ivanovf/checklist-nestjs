@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsNotEmpty,
   IsString,
@@ -14,12 +15,21 @@ export class CreateReservationDto {
   @IsDate()
   @IsNotEmpty()
   @ApiProperty()
-  readonly date: Date;
+  readonly dateIni: Date;
+
+  @IsDate()
+  @IsNotEmpty()
+  @ApiProperty()
+  readonly dateEnd: Date;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
   readonly type: string;
+
+  @IsBoolean()
+  @ApiProperty()
+  readonly validated: boolean;
 
   @IsString()
   @IsNotEmpty()

@@ -12,7 +12,15 @@ export class CreateItemDto {
   @ApiProperty()
   readonly status: boolean;
 
+  @IsBoolean()
+  @ApiProperty()
+  readonly checked = false;
+
   @IsString()
   @ApiProperty()
   readonly description: string;
+
+  @IsString()
+  @ApiProperty()
+  readonly comments = '';
 }
