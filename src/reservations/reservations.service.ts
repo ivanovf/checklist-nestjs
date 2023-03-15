@@ -38,9 +38,19 @@ export class ReservationsService {
   }
 
   findAll(params: FilterReservationsDto) {
-    const { limit, offset, sort, old } = params;
+    const { limit, offset, sort, old, validated } = params;
+    const today = new Date();
 
-    const filter = old ? { dateEnd: { $lte: '2023-03-10' } } : {};
+    const filter = {
+      dataEnd: {},
+      validated: validated,
+    };
+
+    if (old) {
+      filter.dataEnd = {
+        $lte: today.toISOString().split('T')[0],
+      };
+    }
 
     return this.reservationModel
       .find(filter)

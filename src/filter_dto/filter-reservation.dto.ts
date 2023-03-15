@@ -15,4 +15,8 @@ export class FilterReservationsDto extends FilterListDto {
   @IsBoolean()
   @IsOptional()
   old: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  validated: boolean;
 }

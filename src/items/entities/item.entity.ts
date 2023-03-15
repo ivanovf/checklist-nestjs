@@ -19,6 +19,9 @@ export class Item extends Document {
 
   @Prop({ required: false, default: '' })
   comments: string;
+
+  @Prop({ required: true })
+  category: string;
 }
 
 export const ItemSchema = SchemaFactory.createForClass(Item);

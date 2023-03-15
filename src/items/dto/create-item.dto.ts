@@ -23,4 +23,8 @@ export class CreateItemDto {
   @IsString()
   @ApiProperty()
   readonly comments = '';
+
+  @IsString()
+  @ApiProperty()
+  readonly category: string;
 }

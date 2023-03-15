@@ -34,7 +34,6 @@ export class AuthController {
     const token = authHeader.substring('Bearer '.length);
     try {
       const decoded = await this.authService.validateToken(token);
-      console.log(decoded);
       // if the token is valid, the decoded data will be returned
       return { access: true, user: decoded };
     } catch (err) {
