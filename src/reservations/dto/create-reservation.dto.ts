@@ -5,11 +5,13 @@ import {
   IsBoolean,
   IsDate,
   IsNotEmpty,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
 
 import { CreateItemDto } from 'src/items/dto/create-item.dto';
+import { IsDigitalNumber } from 'src/validators/digital-number.validator';
 
 export class CreateReservationDto {
   @IsDate()
@@ -35,6 +37,11 @@ export class CreateReservationDto {
   @IsNotEmpty()
   @ApiProperty()
   readonly contact: string;
+
+  @IsOptional()
+  @IsDigitalNumber(10)
+  @ApiProperty()
+  readonly lockUser: string;
 
   @IsArray()
   @ValidateNested({ each: true })

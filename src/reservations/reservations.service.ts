@@ -43,7 +43,7 @@ export class ReservationsService {
 
     const filter = {
       dataEnd: {},
-      validated: validated,
+      validated: validated ?? false,
     };
 
     if (old) {

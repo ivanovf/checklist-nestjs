@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsIn, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString } from 'class-validator';
 import { FilterListDto } from './filter-list.dto';
 
 export class FilterReservationsDto extends FilterListDto {

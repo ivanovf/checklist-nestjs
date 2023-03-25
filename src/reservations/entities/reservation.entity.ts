@@ -21,6 +21,9 @@ export class Reservation extends Document {
   @Prop({ required: true })
   contact: string;
 
+  @Prop({ required: false })
+  userLock: string;
+
   @Prop({ type: [ItemSchema] })
   items: Types.Array<Item>;
 }
