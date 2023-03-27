@@ -9,6 +9,7 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { DatabaseModule } from 'database.module';
 import { AuthModule } from './auth/auth.module';
 import { LocksModule } from './locks/locks.module';
+import { ConfigModule as ConfigAppModule } from './config/config.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LocksModule } from './locks/locks.module';
       isGlobal: true,
     }),
     AuthModule,
+    ConfigAppModule,
   ],
   controllers: [AppController],
   providers: [AppService],
