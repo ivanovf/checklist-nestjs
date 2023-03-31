@@ -1,8 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
@@ -22,14 +22,13 @@ export class RolesGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();
     const userToken = request.user;
-    console.log(roles);
 
     const isAuth = roles.some((role) => role === userToken.role);
 
     if (!isAuth) {
       console.log('A user without admin role tried to use an endpoint.');
 
-      throw new UnauthorizedException('You are not authorized to this page.')
+      throw new ForbiddenException('You are not authorized to this page.');
     }
 
     return true;

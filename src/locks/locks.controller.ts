@@ -26,12 +26,13 @@ import { Role } from 'src/auth/models/role.model';
 export class LocksController {
   constructor(private readonly locksService: LocksService) {}
 
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() createLockDto: CreateLockDto) {
     return this.locksService.create(createLockDto);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.AUTHENTICATED)
   @Get('all')
   findAll(
     @Query('limit', ParseIntPipe) limit?: 10,
@@ -40,16 +41,19 @@ export class LocksController {
     return this.locksService.findAll(limit, offset);
   }
 
+  @Roles(Role.ADMIN, Role.AUTHENTICATED)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.locksService.findOne(id);
   }
 
+  @Roles(Role.ADMIN)
   @Put(':id')
   update(@Param('id') id: string, @Body() updateLockDto: UpdateLockDto) {
     return this.locksService.update(id, updateLockDto);
   }
 
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.locksService.remove(id);

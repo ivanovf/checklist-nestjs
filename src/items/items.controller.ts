@@ -26,12 +26,13 @@ import { Role } from 'src/auth/models/role.model';
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() createItemDto: CreateItemDto) {
     return this.itemsService.create(createItemDto);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.AUTHENTICATED)
   @Get('all')
   findAll(
     @Query('limit', ParseIntPipe) limit?: 10,
@@ -40,16 +41,19 @@ export class ItemsController {
     return this.itemsService.findAll(limit, offset);
   }
 
+  @Roles(Role.ADMIN, Role.AUTHENTICATED)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.itemsService.findOne(id);
   }
 
+  @Roles(Role.ADMIN)
   @Put(':id')
   update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto) {
     return this.itemsService.update(id, updateItemDto);
   }
 
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.itemsService.remove(id);
