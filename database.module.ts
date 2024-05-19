@@ -1,46 +1,26 @@
 import { Global, Module } from '@nestjs/common';
-import { MongoClient } from 'mongodb';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Global()
 @Module({
-  providers: [
-    {
-      provide: 'MONGO',
-      useFactory: async () => {
-        const dbUser = process.env.DB_USER;
-        const dbPass = encodeURIComponent(process.env.DB_PASS);
-        const dbHost = process.env.DB_HOST;
-        const dbPort = process.env.DB_PORT ? ':' + process.env.DB_PORT : '';
-        const dbDrive = process.env.DB_DRIVE;
-
-        const uri = `${dbDrive}://${dbUser}:${dbPass}@${dbHost}${dbPort}/?authMechanism=DEFAULT`;
-        console.log(uri);
-        const client = new MongoClient(uri);
-
-        await client.connect();
-        const database = client.db('checklist');
-
-        if (database) {
-          console.log('A mongo connection was stablished.');
-        }
-        return database;
-      },
-    },
-  ],
-  exports: ['MONGO', MongooseModule],
   imports: [
     MongooseModule.forRootAsync({
       useFactory: () => {
+        const dbUser = process.env.DB_USER;
+        const dbPass = encodeURIComponent(process.env.DB_PASS);
+        const dbHost = process.env.DB_HOST;
+        const dbPort = process.env.DB_PORT ? `:${process.env.DB_PORT}` : '';
+        const dbDrive = process.env.DB_DRIVE;
+        const args = process.env.DB_ARGS ? `?${process.env.DB_ARGS}`: '';
+
         return {
-          uri: `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`,
-          user: process.env.DB_USER,
-          pass: process.env.DB_PASS,
-          dbName: process.env.DB_NAME,
+          uri: `${dbDrive}://${dbHost}${dbPort}/${args}`,
+          user: dbUser,
+          pass: dbPass,
+          dbName: 'checklist',
         };
       },
     }),
   ],
 })
-
 export class DatabaseModule {}
