@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "build:functions": "npm run build && cp -r dist netlify/functions",
+    "build:functions": "npm run build && mkdir -p netlify/functions && cp -r dist/* netlify/functions/",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
