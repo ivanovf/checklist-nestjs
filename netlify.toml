@@ -1,8 +1,7 @@
 [build]
-  command = "npm run build"
+  command = "npm run build:functions"
   functions = "netlify/functions"
   publish = "dist"
 
-[[plugins]]
-  package = "netlify-lambda"
-
+[functions]
+  directory = "netlify/functions"
