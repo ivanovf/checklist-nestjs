@@ -4,5 +4,5 @@
   publish = "dist"
 
 [[plugins]]
-  package = "@netlify/plugin-lambda"
+  package = "netlify-lambda"
 
