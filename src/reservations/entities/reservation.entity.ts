@@ -24,6 +24,12 @@ export class Reservation extends Document {
   @Prop({ required: false })
   userLock: string;
 
+  @Prop({ required: true })
+  quantity: number;
+
+  @Prop({ required: false })
+  cost: number;
+
   @Prop({ type: [ItemSchema] })
   items: Types.Array<Item>;
 }

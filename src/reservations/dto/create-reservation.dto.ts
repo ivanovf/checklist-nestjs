@@ -5,8 +5,11 @@ import {
   IsBoolean,
   IsDate,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -42,6 +45,15 @@ export class CreateReservationDto {
   @IsDigitalNumber(10)
   @ApiProperty()
   readonly lockUser: string;
+
+  @IsNumber()
+  @Min(1)
+  @Max(8)
+  @IsNotEmpty()
+  readonly quantity: number;
+
+  @IsOptional()
+  readonly cost: number;
 
   @IsArray()
   @ValidateNested({ each: true })

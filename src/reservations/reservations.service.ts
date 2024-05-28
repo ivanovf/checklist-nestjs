@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FilterReservationsDto } from 'src/filter_dto/filter-reservation.dto';
@@ -12,8 +12,17 @@ export class ReservationsService {
     @InjectModel(Reservation.name) private reservationModel: Model<Reservation>,
   ) {}
 
-  create(createReservationDto: CreateReservationDto) {
+  async create(createReservationDto: CreateReservationDto) {
     const reservation = new this.reservationModel(createReservationDto);
+    const checkAvailability = await this.checkAvailability(
+      reservation.dateIni,
+      reservation.dateEnd,
+    );
+
+    if (checkAvailability) {
+      throw new BadRequestException('Reservation not available');
+    }
+
     return reservation.save();
   }
 
@@ -42,15 +51,11 @@ export class ReservationsService {
     const today = new Date();
 
     const filter = {
-      dataEnd: {},
       validated: validated ?? false,
+      dateEnd: old
+        ? { $lte: today.toISOString().split('T')[0] }
+        : { $gte: today.toISOString().split('T')[0] },
     };
-
-    if (old) {
-      filter.dataEnd = {
-        $lte: today.toISOString().split('T')[0],
-      };
-    }
 
     return this.reservationModel
       .find(filter)
@@ -66,5 +71,12 @@ export class ReservationsService {
       throw new NotFoundException(`reservation #${id} not found`);
     }
     return reservation;
+  }
+
+  async checkAvailability(dateIni: Date, dateEnd: Date) {
+    return await this.reservationModel.exists({
+      dateIni,
+      dateEnd,
+    });
   }
 }
