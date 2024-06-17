@@ -50,9 +50,11 @@ export class CreateReservationDto {
   @Min(1)
   @Max(8)
   @IsNotEmpty()
+  @ApiProperty()
   readonly quantity: number;
 
   @IsOptional()
+  @ApiProperty()
   readonly cost: number;
 
   @IsArray()

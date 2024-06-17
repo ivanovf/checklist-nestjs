@@ -10,6 +10,8 @@ import { DatabaseModule } from 'database.module';
 import { AuthModule } from './auth/auth.module';
 import { LocksModule } from './locks/locks.module';
 import { ConfigModule as ConfigAppModule } from './config/config.module';
+import { ActivityModule } from './activity/activity.module';
+import { ActivityTypeModule } from './activity-type/activity-type.module';
 
 @Module({
   imports: [
@@ -19,11 +21,13 @@ import { ConfigModule as ConfigAppModule } from './config/config.module';
     LocksModule,
     DatabaseModule,
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: `.env.${process.env.NODE_ENV || 'local'}`,
       isGlobal: true,
     }),
     AuthModule,
     ConfigAppModule,
+    ActivityModule,
+    ActivityTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,5 @@
 export class AppService {
-  getHello(): object {
+  getHome(): object {
     return {
       api: 'Checklist',
       version: '1.0',
