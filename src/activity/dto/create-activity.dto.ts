@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsEnum, IsMongoId, IsNumber, IsString } from 'class-validator';
-import { ActivityStatus } from '../entities/Activity-status.enum';
+import { ActivityStatus } from '../entities/activity-status.enum';
 
 export class CreateActivityDto {
   @ApiProperty()
