@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ActivityType } from 'src/activity-type/entities/activity-type.entity';
+import { ActivityStatus } from './Activity-status.enum';
 
 @Schema({
   timestamps: true,
@@ -9,7 +10,8 @@ export class Activity extends Document {
   @Prop({ required: true, type: Types.ObjectId, ref: 'ActivityType' })
   type: ActivityType;
 
-  status: string;
+  @Prop({ required: true, enum: ActivityStatus, default: ActivityStatus.TODO })
+  status: ActivityStatus;
 
   @Prop({ required: true })
   price: number;

@@ -11,7 +11,7 @@ import {
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))
@@ -21,6 +21,8 @@ export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 
   @Post()
+  @ApiResponse({ status: 201, description: 'Activity created successfully' })
+  @ApiOperation({ summary: 'Create a new activity' })
   create(@Body() createActivityDto: CreateActivityDto) {
     return this.activityService.create(createActivityDto);
   }
