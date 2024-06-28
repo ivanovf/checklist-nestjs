@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { FilterActivityDto } from './dto/filter-activity.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Activity')
@@ -28,8 +30,10 @@ export class ActivityController {
   }
 
   @Get()
-  findAll() {
-    return this.activityService.findAll();
+  @ApiResponse({ status: 200, description: 'Return all activities' })
+  @ApiOperation({ summary: 'Return all activities' })
+  findAll(@Query() filterActivityDto: FilterActivityDto) {
+    return this.activityService.findAll(filterActivityDto);
   }
 
   @Get(':id')

@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Activity } from './entities/activity.entity';
 import { ActivityType } from 'src/activity-type/entities/activity-type.entity';
+import { FilterActivityDto } from './dto/filter-activity.dto';
 
 @Injectable()
 export class ActivityService {
@@ -25,8 +26,26 @@ export class ActivityService {
     return activity.save();
   }
 
-  findAll() {
-    return this.activityModel.find().populate('type').exec();
+  findAll(filter: FilterActivityDto) {
+    const query: any = {};
+
+    if (filter.type) {
+      query.type = filter.type;
+    }
+
+    if (filter.status) {
+      query.status = filter.status;
+    }
+
+    if (filter.price) {
+      query.price = filter.price;
+    }
+
+    return this.activityModel
+      .find(query)
+      .sort({ date: -1 })
+      .populate('type')
+      .exec();
   }
 
   async findOne(id: string): Promise<Activity> {
