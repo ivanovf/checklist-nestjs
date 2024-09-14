@@ -9,4 +9,7 @@ export class CreateConfigDto {
 
   @IsNumber()
   readonly usersLimit: number;
+
+  @IsNumber()
+  readonly analogLecture: number;
 }

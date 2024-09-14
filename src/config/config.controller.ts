@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
@@ -36,5 +37,13 @@ export class ConfigController {
   @Put(':id')
   update(@Param('id') id: string, @Body() updateConfigDto: UpdateConfigDto) {
     return this.configService.update(id, updateConfigDto);
+  }
+
+  @Patch(':id')
+  updateAnalogLecure(
+    @Param('id') id: string,
+    @Body() updateConfigDto: UpdateConfigDto,
+  ) {
+    return this.configService.updateAnalogLecure(id, updateConfigDto);
   }
 }

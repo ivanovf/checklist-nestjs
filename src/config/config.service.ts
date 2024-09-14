@@ -33,4 +33,19 @@ export class ConfigService {
     }
     return appConf;
   }
+
+  updateAnalogLecure(id: string, updateConfigDto: UpdateConfigDto) {
+    if (!updateConfigDto.analogLecture) {
+      throw new NotFoundException(`Analog lecture not found`);
+    }
+
+    const appConf = this.configModel
+      .findByIdAndUpdate(id, { $set: updateConfigDto }, { new: true })
+      .exec();
+
+    if (!appConf) {
+      throw new NotFoundException(id);
+    }
+    return appConf;
+  }
 }

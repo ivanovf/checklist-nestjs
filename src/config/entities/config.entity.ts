@@ -13,6 +13,9 @@ export class Config extends Document {
 
   @Prop({ required: true, default: 20 })
   usersLimit: number;
+
+  @Prop({ required: false, default: 0 })
+  analogLecture: number;
 }
 
 export const ConfigSchema = SchemaFactory.createForClass(Config);
