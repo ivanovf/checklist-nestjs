@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { CreateConfigDto } from './dto/create-config.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
 import { Config } from './entities/config.entity';
+import { TankLevelConfigDto } from './dto/tank-level-config.dto';
 
 @Injectable()
 export class ConfigService {
@@ -34,13 +35,13 @@ export class ConfigService {
     return appConf;
   }
 
-  updateAnalogLecure(id: string, updateConfigDto: UpdateConfigDto) {
-    if (!updateConfigDto.analogLecture) {
-      throw new NotFoundException(`Analog lecture not found`);
+  updateAnalogLecure(id: string, tankLevelConfigDto: TankLevelConfigDto) {
+    if (tankLevelConfigDto.apiKey !== process.env.TANK_API_KEY) {
+      throw new NotFoundException('Invalid API Key');
     }
 
     const appConf = this.configModel
-      .findByIdAndUpdate(id, { $set: updateConfigDto }, { new: true })
+      .findByIdAndUpdate(id, { $set: tankLevelConfigDto }, { new: true })
       .exec();
 
     if (!appConf) {

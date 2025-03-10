@@ -15,8 +15,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { Role } from 'src/auth/models/role.model';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/models/role.model';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Users')

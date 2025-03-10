@@ -15,6 +15,7 @@ import { CreateConfigDto } from './dto/create-config.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/models/role.model';
+import { TankLevelConfigDto } from './dto/tank-level-config.dto';
 @ApiTags('Config')
 @Controller('config')
 export class ConfigController {
@@ -44,8 +45,8 @@ export class ConfigController {
   @Patch(':id')
   updateAnalogLecure(
     @Param('id') id: string,
-    @Body() updateConfigDto: UpdateConfigDto,
+    @Body() tankLevelConfigDto: TankLevelConfigDto,
   ) {
-    return this.configService.updateAnalogLecure(id, updateConfigDto);
+    return this.configService.updateAnalogLecure(id, tankLevelConfigDto);
   }
 }

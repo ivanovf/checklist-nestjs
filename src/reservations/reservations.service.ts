@@ -51,14 +51,14 @@ export class ReservationsService {
   }
 
   findAll(params: FilterReservationsDto) {
-    const { limit, offset, sort, old, validated } = params;
+    const { limit, offset, sort, old, validated, dateFrom, dateTo } = params;
     const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
 
     const filter = {
       validated: validated ?? false,
-      dateEnd: old
-        ? { $lte: today.toISOString().split('T')[0] }
-        : { $gte: today.toISOString().split('T')[0] },
+      dateEnd: old ? { $lte: todayString } : { $gte: todayString },
+      dateIni: dateFrom ? { $gte: dateFrom, $lte: dateTo } : null,
     };
 
     return this.reservationModel
