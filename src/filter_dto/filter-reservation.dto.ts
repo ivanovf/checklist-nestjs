@@ -6,31 +6,34 @@ import {
   IsString,
 } from 'class-validator';
 import { FilterListDto } from './filter-list.dto';
+import { Transform } from 'class-transformer';
 
 export class FilterReservationsDto extends FilterListDto {
-  @IsString()
   @IsOptional()
+  @IsString()
   @IsIn(['airbnb', 'booking', 'direct'])
   type: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   @IsIn(['asc', 'desc'])
   sort = 'desc';
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true')
   old: boolean;
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true')
   validated: boolean;
 
-  @IsDateString()
   @IsOptional()
+  @IsDateString()
   dateFrom: string;
 
-  @IsDateString()
   @IsOptional()
+  @IsDateString()
   dateTo: string;
 }
