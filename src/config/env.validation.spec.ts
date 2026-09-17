@@ -49,6 +49,18 @@ describe('envValidationSchema — CORS_ORIGINS', () => {
     expect(error).toBeDefined();
   });
 
+  it('accepts the literal "none" for a service with no browser client', () => {
+    // A native mobile client is not governed by CORS at all, so "no origins permitted" is
+    // the honest configuration rather than a placeholder origin nothing will ever use.
+    expect(validate({ CORS_ORIGINS: 'none' }).error).toBeUndefined();
+  });
+
+  it('still requires the value to be set deliberately when deployed', () => {
+    // "none" is an explicit choice; an absent value remains a configuration error, so a
+    // forgotten variable is still caught rather than silently defaulting to deny-all.
+    expect(validate({}).error).toBeDefined();
+  });
+
   it('accepts a single absolute origin', () => {
     expect(
       validate({ CORS_ORIGINS: 'https://app.example' }).error,
@@ -74,6 +86,11 @@ describe('envValidationSchema — CORS_ORIGINS', () => {
 describe('parseCorsOrigins', () => {
   it('returns an empty list when the value is absent', () => {
     expect(parseCorsOrigins(undefined)).toEqual([]);
+  });
+
+  it('returns an empty list for "none"', () => {
+    expect(parseCorsOrigins('none')).toEqual([]);
+    expect(parseCorsOrigins(' none ')).toEqual([]);
   });
 
   it('parses a single origin', () => {

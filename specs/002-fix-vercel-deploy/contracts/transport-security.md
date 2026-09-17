@@ -20,8 +20,25 @@ a list and passed as the allowed origins.
 
 | Environment | `CORS_ORIGINS` | Behaviour |
 |---|---|---|
-| Deployed | **required**, non-empty | Only the listed origins are granted access |
+| Deployed | **required**, a list | Only the listed origins are granted access |
+| Deployed | **required**, `none` | No browser origin is granted access |
 | Local | optional | Absent means local development origins work without configuration |
+
+### `none` — for an API with no browser client
+
+CORS is a browser mechanism. A native client (Flutter, React Native, Swift, Kotlin) sends
+no `Origin` and enforces nothing, so the allowlist neither permits nor blocks it. For a
+service consumed only by native clients, the honest configuration is `CORS_ORIGINS=none`:
+no browser origin is granted access, and no placeholder origin is invented to satisfy a
+required field.
+
+It remains **required** — `none` is an explicit choice, so a forgotten variable is still a
+startup failure rather than silently defaulting to deny-all. When a browser client is added
+later (a reports page, say), its origin replaces `none` and no code changes.
+
+Note what `none` does *not* do: it withholds the response header a browser needs, and
+nothing more. The API still answers. CORS is not access control — the authentication and
+role guards are. A native app, `curl`, or another server reaches the API regardless.
 
 This reuses feature 001's existing configuration contract verbatim — comma-separated
 absolute origins, optional locally, required in production, with the startup message

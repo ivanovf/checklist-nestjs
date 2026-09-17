@@ -65,9 +65,23 @@ export function configureApp(app: INestApplication): void {
   }
 
   // An explicit allowlist rather than the previous bare `enableCors()`, which granted every
-  // origin. Deployed environments always have a list, because startup validation requires
-  // the value there; locally an absent value keeps development origins working without
-  // configuration.
-  const origins = parseCorsOrigins(config.get<string>('CORS_ORIGINS'));
-  app.enableCors(origins.length > 0 ? { origin: origins } : {});
+  // origin. Three deliberate states, because "no origins configured" and "no origins
+  // permitted" are different intentions and only one of them is safe once deployed:
+  //
+  //   absent  — local development only; startup validation requires the value once
+  //             deployed, so this branch is unreachable there.
+  //   'none'  — no browser origin may call this service. Correct for an API consumed only
+  //             by native clients, which CORS does not govern in any case.
+  //   a list  — only those origins are granted access.
+  const configuredOrigins = config.get<string>('CORS_ORIGINS');
+  const origins = parseCorsOrigins(configuredOrigins);
+
+  if (configuredOrigins === undefined) {
+    app.enableCors();
+  } else if (origins.length === 0) {
+    // `origin: false` omits the header entirely, so a browser refuses the response.
+    app.enableCors({ origin: false });
+  } else {
+    app.enableCors({ origin: origins });
+  }
 }

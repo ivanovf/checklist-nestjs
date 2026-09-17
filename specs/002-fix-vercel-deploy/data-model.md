@@ -20,7 +20,7 @@ directly, so that nothing consumes a value that has not passed startup validatio
 
 | Key | Type | Local | Deployed | Validation | Consumed by |
 |---|---|---|---|---|---|
-| `CORS_ORIGINS` | comma-separated absolute origins | optional | **required** | non-empty; each entry a syntactically valid absolute origin (scheme + host, no trailing path) | transport setup (FR-012, FR-013) |
+| `CORS_ORIGINS` | comma-separated absolute origins, or the literal `none` | optional | **required** | non-empty; either `none` or entries that are syntactically valid absolute origins (scheme + host, no trailing path) | transport setup (FR-012, FR-013) |
 | `NODE_ENV` | enum: `local` \| `production` | required | required | already validated by the existing schema | documentation gating (FR-002a), CORS requiredness |
 
 `CORS_ORIGINS` is **not new to the project** — feature 001's configuration contract already
@@ -37,6 +37,7 @@ strings.
 | `https://a.example,https://b.example` | `["https://a.example", "https://b.example"]` | ordinary case |
 | `https://a.example, https://b.example` | `["https://a.example", "https://b.example"]` | surrounding spaces trimmed |
 | `https://a.example,` | `["https://a.example"]` | trailing separator produces no empty entry |
+| `none` | `[]` | no browser origin permitted; correct for a native-only client |
 | `` (empty, deployed) | — | startup fails, naming the value |
 | `'https://a.example'` (quoted) | — | startup fails; the platform does not strip quotes the way a local env file does, and a quoted origin is not a valid origin |
 

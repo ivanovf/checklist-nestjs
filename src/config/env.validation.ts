@@ -35,12 +35,18 @@ export const envValidationSchema = Joi.object({
   // allowlist grants every origin — the state Constitution III prohibits. Left optional
   // locally so development needs no configuration.
   //
+  // The literal `none` is accepted and means "no browser origin may call this service".
+  // That is the correct posture for an API consumed only by native clients: CORS is a
+  // browser mechanism, so a native app is unaffected either way, and `none` states the
+  // intent explicitly instead of forcing a placeholder origin that nothing will ever use.
+  // It still has to be set deliberately, so a forgotten configuration is caught.
+  //
   // The pattern is what rejects a value pasted with its quotes still attached: a hosting
   // dashboard takes values literally, unlike a local env file, and `'https://x'` is not a
   // valid origin. It also requires an explicit scheme, so a bare host fails rather than
   // being silently accepted and never matching anything.
   CORS_ORIGINS: Joi.string()
-    .pattern(/^https?:\/\/[^\s,'"]+(\s*,\s*https?:\/\/[^\s,'"]+)*,?$/)
+    .pattern(/^(none|https?:\/\/[^\s,'"]+(\s*,\s*https?:\/\/[^\s,'"]+)*,?)$/)
     .when('NODE_ENV', {
       is: 'production',
       then: Joi.required(),
@@ -50,7 +56,7 @@ export const envValidationSchema = Joi.object({
       'any.required': 'CORS_ORIGINS is required when NODE_ENV=production',
       'string.empty': 'CORS_ORIGINS is required when NODE_ENV=production',
       'string.pattern.base':
-        'CORS_ORIGINS must be a comma-separated list of absolute origins, unquoted (e.g. https://app.example,https://admin.example)',
+        'CORS_ORIGINS must be "none" (no browser client) or a comma-separated list of absolute origins, unquoted (e.g. https://app.example,https://admin.example)',
     }),
 }).unknown(true);
 
@@ -62,7 +68,7 @@ export const envValidationSchema = Joi.object({
  * easy to misread as "allow everything".
  */
 export function parseCorsOrigins(value: string | undefined): string[] {
-  if (!value) {
+  if (!value || value.trim() === 'none') {
     return [];
   }
 

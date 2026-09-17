@@ -105,6 +105,40 @@ describe('Transport security (e2e)', () => {
     });
   });
 
+  describe('a deployed environment with no browser client', () => {
+    let app: INestApplication;
+
+    beforeAll(async () => {
+      app = await createTestApp({
+        transport: true,
+        nodeEnv: 'production',
+        corsOrigins: 'none',
+      });
+    });
+
+    afterAll(async () => {
+      await app.close();
+      restoreEnv();
+    });
+
+    it('grants cross-origin access to no origin at all', async () => {
+      // The posture for an API consumed only by native clients. A native client is
+      // unaffected — it sends no Origin and enforces nothing — while a browser is refused.
+      const response = await request(app.getHttpServer())
+        .get('/api')
+        .set('Origin', 'https://anything.example');
+
+      expect(response.status).toBe(200);
+      expect(response.headers['access-control-allow-origin']).toBeUndefined();
+    });
+
+    it('still serves the API itself', async () => {
+      // Deny-all CORS must not be confused with blocking requests: it only withholds the
+      // header a browser needs. Access control is the guards' job, not CORS's.
+      await request(app.getHttpServer()).get('/api').expect(200);
+    });
+  });
+
   describe('outside a deployed environment', () => {
     let app: INestApplication;
 
