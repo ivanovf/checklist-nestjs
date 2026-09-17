@@ -68,6 +68,12 @@ export const AUTHORIZATION_MATRIX: RouteRule[] = [
   { row: 35, method: 'get', path: '/api/locks/:id', access: 'auth' },
   { row: 36, method: 'put', path: '/api/locks/:id', access: 'admin' },
   { row: 37, method: 'delete', path: '/api/locks/:id', access: 'admin' },
+
+  // Row 38 originates in feature 002, not the 001 contract: see
+  // specs/002-fix-vercel-deploy/contracts/health-endpoint.md. Public by design, because
+  // deploy verification runs before any credential exists, and the route discloses only
+  // two availability labels.
+  { row: 38, method: 'get', path: '/api/health', access: 'public' },
 ];
 
 /** Roles permitted to reach a route, for the authenticated cases. */

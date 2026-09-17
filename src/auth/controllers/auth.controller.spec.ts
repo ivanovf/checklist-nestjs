@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ThrottlerModule, seconds } from '@nestjs/throttler';
 import { UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -26,6 +27,14 @@ describe('AuthController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
+      // The login route declares ThrottlerGuard, and Nest resolves route guards at module
+      // initialisation, so the throttler's options provider has to exist here even though
+      // these tests call the controller methods directly.
+      imports: [
+        ThrottlerModule.forRoot([
+          { name: 'default', ttl: seconds(60), limit: 20 },
+        ]),
+      ],
       controllers: [AuthController],
       providers: [{ provide: AuthService, useValue: auth }],
     }).compile();

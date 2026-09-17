@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Throttle, ThrottlerGuard, seconds } from '@nestjs/throttler';
 import { Request } from 'express';
 import { User } from '../../users/entities/user.entity';
 import { AuthService } from '../services/auth.service';
@@ -17,8 +18,17 @@ import { Public } from '../../common/decorators/public.decorator';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  /**
+   * Five attempts per minute per source. ThrottlerGuard is deliberately listed BEFORE
+   * AuthGuard: guards run in declaration order, so if authentication ran first a wrong
+   * password would throw 401 before the counter incremented — failed sign-in attempts would
+   * never be counted and the limit would protect nothing.
+   *
+   * No blockDuration: the refusal must lift when the window resets (SC-010).
+   */
   @Public()
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(ThrottlerGuard, AuthGuard('local'))
+  @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   @Post()
   login(@Req() req: Request) {
     const user = req.user as User;

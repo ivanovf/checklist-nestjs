@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, seconds } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 import { AppController } from './app.controller';
@@ -14,6 +15,7 @@ import { ConfigModule as ConfigAppModule } from './config/config.module';
 import { ActivityModule } from './activity/activity.module';
 import { ActivityTypeModule } from './activity-type/activity-type.module';
 import { envValidationSchema } from './config/env.validation';
+import { HealthModule } from './health/health.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -31,6 +33,10 @@ import { RolesGuard } from './auth/guards/roles.guard';
         abortEarly: false,
       },
     }),
+    // A conservative default for every route; the sign-in route tightens it further with
+    // its own @Throttle. `ttl` is milliseconds from throttler v5 onward, so the `seconds`
+    // helper keeps the unit explicit rather than leaving a bare 60000 to be misread.
+    ThrottlerModule.forRoot([{ name: 'default', ttl: seconds(60), limit: 20 }]),
     DatabaseModule,
     UsersModule,
     ItemsModule,
@@ -40,6 +46,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     ConfigAppModule,
     ActivityModule,
     ActivityTypeModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
