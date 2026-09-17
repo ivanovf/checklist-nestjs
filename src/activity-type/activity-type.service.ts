@@ -35,7 +35,7 @@ export class ActivityTypeService {
     return activityType;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.activityTypeModel.findByIdAndDelete(id);
   }
 }

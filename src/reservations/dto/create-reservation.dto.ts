@@ -13,8 +13,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { CreateItemDto } from 'src/items/dto/create-item.dto';
-import { IsDigitalNumber } from 'src/validators/digital-number.validator';
+import { CreateItemDto } from '../../items/dto/create-item.dto';
+import { IsDigitalNumber } from '../../validators/digital-number.validator';
 
 export class CreateReservationDto {
   @IsDate()

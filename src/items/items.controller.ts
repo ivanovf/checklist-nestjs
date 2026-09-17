@@ -8,20 +8,16 @@ import {
   Put,
   ParseIntPipe,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { Role } from 'src/auth/models/role.model';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/models/role.model';
 
 @ApiTags('Items')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}

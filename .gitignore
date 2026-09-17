@@ -39,3 +39,14 @@ lerna-debug.log*
 *.env.*
 mongo_data/*
 .vercel
+
+# Serverless
+.serverless/
+.serverless_nextjs/
+.build/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Claude Code local settings
+.claude/settings.local.json

@@ -1,0 +1,28 @@
+<Summary line: imperative mood, ~50-70 chars, no trailing period, no type prefix>
+
+<Body (omit for trivial one-line changes):
+- 1-4 short paragraphs, or bullet points if there are multiple distinct
+  changes, explaining what changed and why.
+- Focus on reasoning/impact, not a line-by-line narration of the diff.
+- Stay factual and neutral; don't editorialize or mention tooling/AI.>
+
+Example (feature change):
+---
+Add retry logic to payment webhook handler
+
+The webhook was failing silently on transient network errors from the
+payment provider, causing orders to get stuck in "pending". Adds
+exponential backoff (3 attempts, 200ms/800ms/3200ms) and logs each
+retry so we can see failure patterns in the dashboard.
+
+Example (simple fix, no body needed):
+---
+Fix off-by-one error in pagination offset
+
+Example (multi-part change, bullets):
+---
+Update user settings API to support partial updates
+
+- Change PATCH handler to merge instead of replace the settings object
+- Add validation for unknown fields (previously silently dropped)
+- Extend test suite to cover partial-update and unknown-field cases

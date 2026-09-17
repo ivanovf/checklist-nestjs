@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { ActivityType } from 'src/activity-type/entities/activity-type.entity';
+import { ActivityType } from '../../activity-type/entities/activity-type.entity';
 import { ActivityStatus } from './activity-status.enum';
 
 @Schema({

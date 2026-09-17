@@ -1,0 +1,5 @@
+# This deployment publishes an API, not a browsable site. The interactive API
+# documentation is deliberately not served from deployed environments, so there is
+# nothing here worth indexing.
+User-agent: *
+Disallow: /

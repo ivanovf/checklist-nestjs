@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -18,16 +18,13 @@ export class AuthService {
       throw new UnauthorizedException('User or password incorrect.');
     }
 
-    if (user) {
-      const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
-      if (!isMatch) {
-        throw new UnauthorizedException('User or password incorrect.');
-      }
-      return this.userService.skipPassword(user);
+    if (!isMatch) {
+      throw new UnauthorizedException('User or password incorrect.');
     }
 
-    return null;
+    return this.userService.skipPassword(user);
   }
 
   generateJWT(user: User) {

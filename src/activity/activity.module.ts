@@ -6,7 +6,7 @@ import { Activity, ActivitySchema } from './entities/activity.entity';
 import {
   ActivityType,
   ActivityTypeSchema,
-} from 'src/activity-type/entities/activity-type.entity';
+} from '../activity-type/entities/activity-type.entity';
 
 @Module({
   controllers: [ActivityController],
