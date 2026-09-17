@@ -36,6 +36,18 @@ describe('envValidationSchema — CORS_ORIGINS', () => {
     expect(error?.message).toContain('CORS_ORIGINS');
   });
 
+  it('distinguishes an unset value from one set to empty', () => {
+    // These are different mistakes with different fixes. A shared message sends the reader
+    // hunting for a missing variable when the variable is actually there but blank, or
+    // scoped to a different environment than the one being deployed.
+    const unset = validate({}).error?.message;
+    const empty = validate({ CORS_ORIGINS: '' }).error?.message;
+
+    expect(unset).toContain('is not set');
+    expect(empty).toContain('set but empty');
+    expect(unset).not.toEqual(empty);
+  });
+
   it('rejects a value wrapped in quotes, which a dashboard paste produces', () => {
     const { error } = validate({ CORS_ORIGINS: "'https://app.example'" });
 

@@ -53,8 +53,15 @@ export const envValidationSchema = Joi.object({
       otherwise: Joi.optional(),
     })
     .messages({
-      'any.required': 'CORS_ORIGINS is required when NODE_ENV=production',
-      'string.empty': 'CORS_ORIGINS is required when NODE_ENV=production',
+      // Distinct messages on purpose. "Not set at all" and "set but blank" are different
+      // mistakes with different fixes — on a hosting platform the second usually means the
+      // variable exists but was saved empty, or was scoped to a different environment than
+      // the one being deployed. One shared message sends the reader looking in the wrong
+      // place.
+      'any.required':
+        'CORS_ORIGINS is not set, and is required when NODE_ENV=production. Set it to "none" if no browser client calls this API, or to a comma-separated list of origins. Check it is enabled for the environment being deployed.',
+      'string.empty':
+        'CORS_ORIGINS is set but empty. Set it to "none" if no browser client calls this API, or to a comma-separated list of origins.',
       'string.pattern.base':
         'CORS_ORIGINS must be "none" (no browser client) or a comma-separated list of absolute origins, unquoted (e.g. https://app.example,https://admin.example)',
     }),
