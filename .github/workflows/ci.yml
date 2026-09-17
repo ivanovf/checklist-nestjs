@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Constitution gate 1
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+
+      # Constitution gate 2 — unit tests and coverage thresholds
+      - name: Unit tests
+        run: npm test -- --coverage
+
+      # Constitution gate 3 — end-to-end tests
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      # Constitution gate 4
+      - name: Build
+        run: npm run build

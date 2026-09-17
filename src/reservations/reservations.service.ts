@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FilterReservationsDto } from 'src/filter_dto/filter-reservation.dto';
+import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { Reservation } from './entities/reservation.entity';
@@ -51,7 +51,8 @@ export class ReservationsService {
   }
 
   findAll(params: FilterReservationsDto) {
-    const { limit, offset, sort, old, validated, dateFrom, dateTo, type } = params;
+    const { limit, offset, sort, old, validated, dateFrom, dateTo, type } =
+      params;
     const todayString = new Date().toISOString().split('T')[0];
 
     const filter: any = {

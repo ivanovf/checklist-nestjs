@@ -1,24 +1,26 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+
+import { createTestApp } from './security/app-factory';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  beforeAll(async () => {
+    // Runs against the in-memory MongoDB from global-setup rather than a real cluster.
+    app = await createTestApp();
   });
 
-  it('/ (GET)', () => {
+  afterAll(async () => {
+    await app?.close();
+  });
+
+  it('serves the service root without a credential', () => {
+    // Marked @Public: it carries no reservation or account data and the deployment platforms
+    // use it as a liveness probe.
     return request(app.getHttpServer())
-      .get('/')
+      .get('/api')
       .expect(200)
-      .expect('Hello World!');
+      .expect({ api: 'Checklist', version: '1.0' });
   });
 });

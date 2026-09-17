@@ -4,7 +4,7 @@ import { UpdateActivityDto } from './dto/update-activity.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Activity } from './entities/activity.entity';
-import { ActivityType } from 'src/activity-type/entities/activity-type.entity';
+import { ActivityType } from '../activity-type/entities/activity-type.entity';
 import { FilterActivityDto } from './dto/filter-activity.dto';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { IsDigitalNumber } from 'src/validators/digital-number.validator';
+import { IsDigitalNumber } from '../../validators/digital-number.validator';
 
 export class CreateLockDto {
   @IsDigitalNumber(10000)

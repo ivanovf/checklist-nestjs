@@ -7,18 +7,15 @@ import {
   Delete,
   Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
-import { FilterReservationsDto } from 'src/filter_dto/filter-reservation.dto';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { Role } from 'src/auth/models/role.model';
+import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/models/role.model';
 
-@UseGuards(AuthGuard('jwt'))
 @ApiTags('Reservations')
 @Controller('reservations')
 export class ReservationsController {

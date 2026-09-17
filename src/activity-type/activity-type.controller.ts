@@ -6,17 +6,14 @@ import {
   Put,
   Param,
   Delete,
-  UseGuards,
 } from '@nestjs/common';
 import { ActivityTypeService } from './activity-type.service';
 import { CreateActivityTypeDto } from './dto/create-activity-type.dto';
 import { UpdateActivityTypeDto } from './dto/update-activity-type.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { Role } from 'src/auth/models/role.model';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/models/role.model';
 
-@UseGuards(AuthGuard('jwt'))
 @ApiTags('Activity Type')
 @Controller('activity-type')
 @Roles(Role.ADMIN)

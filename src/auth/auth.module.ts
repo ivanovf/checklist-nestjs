@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
 
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 import { AuthService } from './services/auth.service';
 import { LocalStrategy } from './strategy/local-strategy';
 import { AuthController } from './controllers/auth.controller';
@@ -13,9 +14,12 @@ import { JwtStrategy } from './strategy/jwt-strategy';
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({
-      useFactory: () => {
+      // Injected rather than read from process.env, so the signing secret cannot be picked up
+      // before startup validation has confirmed it meets the minimum strength.
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
         return {
-          secret: process.env.SECRET,
+          secret: config.get<string>('SECRET'),
           signOptions: {
             expiresIn: '1d',
           },

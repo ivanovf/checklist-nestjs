@@ -9,14 +9,15 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { User } from 'src/users/entities/user.entity';
-import { RolesGuard } from '../guards/roles.guard';
+import { User } from '../../users/entities/user.entity';
 import { AuthService } from '../services/auth.service';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('login')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @UseGuards(AuthGuard('local'))
   @Post()
   login(@Req() req: Request) {
@@ -24,7 +25,6 @@ export class AuthController {
     return this.authService.generateJWT(user);
   }
 
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('validate')
   async validateToken(@Headers('authorization') authHeader: string) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
