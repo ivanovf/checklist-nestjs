@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -26,7 +26,7 @@ jobs:
 
       # Constitution gate 1
       - name: Lint
-        run: npm run lint -- --max-warnings=0
+        run: npm run lint:ci
 
       # Constitution gate 2 — unit tests and coverage thresholds
       - name: Unit tests

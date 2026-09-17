@@ -36,7 +36,7 @@ export class AuthController {
       const decoded = await this.authService.validateToken(token);
       // if the token is valid, the decoded data will be returned
       return { access: true, user: decoded };
-    } catch (err) {
+    } catch {
       // if the token is invalid, an error will be thrown
       throw new UnauthorizedException('Invalid token');
     }
