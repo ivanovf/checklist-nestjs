@@ -1,15 +1,19 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "src/main.ts",
-      "use": "@vercel/node"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "nest build",
+  "installCommand": "npm install --include=dev",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "dist/**",
+      "memory": 1024,
+      "maxDuration": 30
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "src/main.ts"
+      "source": "/(.*)",
+      "destination": "/api"
     }
   ]
 }
