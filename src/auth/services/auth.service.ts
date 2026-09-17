@@ -18,16 +18,13 @@ export class AuthService {
       throw new UnauthorizedException('User or password incorrect.');
     }
 
-    if (user) {
-      const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
-      if (!isMatch) {
-        throw new UnauthorizedException('User or password incorrect.');
-      }
-      return this.userService.skipPassword(user);
+    if (!isMatch) {
+      throw new UnauthorizedException('User or password incorrect.');
     }
 
-    return null;
+    return this.userService.skipPassword(user);
   }
 
   generateJWT(user: User) {
