@@ -104,7 +104,10 @@ specs/003-pnpm-migration/
 ├── contracts/
 │   └── developer-interface.md       # HTTP unchanged + command surface
 ├── checklists/requirements.md
-└── tasks.md                         # /speckit-tasks (not created here)
+├── tasks.md                         # /speckit-tasks (not created here)
+└── baseline.md                      # NEW, created by tasks.md T002: before/after
+                                      # metrics (coverage, audit counts, Vercel bundle
+                                      # size/cold start) that SC-003/004/007/008 compare
 ```
 
 ### Source Code (repository root)

@@ -230,6 +230,24 @@ checks from Story 2, and confirm the results match the pre-upgrade baseline.
   date, in a form the audit step reads, so an accepted advisory does not fail CI and an
   unaccepted one does. A high or critical advisory MAY be accepted only when no patched
   version exists anywhere in its dependency chain.
+- **FR-012**: The README, CLAUDE.md, script usage comments, and the constitution's quality
+  gate list MUST reference pnpm commands. The constitution change MUST follow its amendment
+  procedure as a PATCH bump.
+- **FR-013**: The legacy deployment targets MUST be removed as dead configuration, which
+  leaves Vercel as the only deploy path. This covers the AWS Lambda Docker image, the
+  Serverless Framework config and its local state, the Lambda entry file and its TypeScript
+  config, the Heroku Procfile, the static-site config, and the package scripts that exist
+  only for those targets (`predeploy`, `heroku-postbuild`, `build-lambda`). Dependencies
+  that only those removed files use MUST be removed too. Confirm each one has no remaining
+  importer before removing it.
+- **FR-014**: Instructions MUST tell a developer with an existing npm install how to move
+  to pnpm (a clean reinstall), and following them MUST yield passing gates.
+- **FR-015**: Removing the legacy files MUST NOT change where the compiled application
+  lands, because the Vercel function entry loads it from a fixed path. The root-level
+  database module is still imported by the application and MUST stay where it is.
+- **FR-016**: The constitution's references to AWS Lambda as a deployment target MUST be
+  updated to name Vercel as the only target. This goes in the same PATCH amendment as the
+  gate list change (FR-012).
 - **FR-017**: After the legacy dependencies are removed (FR-013), this feature MUST upgrade
   dependencies until the audit reports no high or critical advisories, apart from those
   accepted under FR-011. The remedies, in order of preference, are:
@@ -241,24 +259,6 @@ checks from Story 2, and confirm the results match the pre-upgrade baseline.
   status codes, request validation, and response shapes. The existing unit, e2e, and
   API-documentation tests are the evidence, and none of them may be weakened to make an
   upgrade pass.
-- **FR-012**: The README, CLAUDE.md, script usage comments, and the constitution's quality
-  gate list MUST reference pnpm commands. The constitution change MUST follow its amendment
-  procedure as a PATCH bump.
-- **FR-013**: The legacy deployment targets MUST be removed as dead configuration, which
-  leaves Vercel as the only deploy path. This covers the AWS Lambda Docker image, the
-  Serverless Framework config and its local state, the Lambda entry file and its TypeScript
-  config, the Heroku Procfile, the static-site config, and the package scripts that exist
-  only for those targets (`predeploy`, `heroku-postbuild`, `build-lambda`). Dependencies
-  that only those removed files use MUST be removed too. Confirm each one has no remaining
-  importer before removing it.
-- **FR-015**: Removing the legacy files MUST NOT change where the compiled application
-  lands, because the Vercel function entry loads it from a fixed path. The root-level
-  database module is still imported by the application and MUST stay where it is.
-- **FR-016**: The constitution's references to AWS Lambda as a deployment target MUST be
-  updated to name Vercel as the only target. This goes in the same PATCH amendment as the
-  gate list change (FR-012).
-- **FR-014**: Instructions MUST tell a developer with an existing npm install how to move
-  to pnpm (a clean reinstall), and following them MUST yield passing gates.
 
 ### Key Entities
 
@@ -285,6 +285,11 @@ checks from Story 2, and confirm the results match the pre-upgrade baseline.
 - **SC-008**: The dependency audit reports zero high and zero critical advisories that are
   not accepted, down from 27 (22 high, 5 critical) under npm on 2026-09-21. Each accepted
   advisory has a recorded justification stating that no patched version exists.
+  `npm audit` counts one row per affected package (27); `pnpm audit`, used everywhere
+  else in this feature, counts one row per advisory and reports more of them for the same
+  underlying set (see research.md R3 for the reconciled counts at each stage). Both must
+  reach zero at the high/critical level; only the npm figure is the "down from" baseline,
+  because it is what a developer sees today.
 - **SC-005**: No tracked file outside intentional references (registry badges, ignore
   entries for npm debug logs) instructs anyone to run an npm or npx command.
 - **SC-006**: A CI run with unchanged dependencies installs faster than the first run on
