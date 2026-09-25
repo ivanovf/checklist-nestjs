@@ -1,0 +1,13 @@
+allowBuilds:
+  bcrypt: true
+  mongodb-memory-server: true
+  # Denied: the postinstall only prints a funding banner.
+  '@nestjs/core': false
+  # Denied: the postinstall only sends install telemetry.
+  '@scarf/scarf': false
+  # Denied: the postinstall only runs a binary self-check.
+  esbuild: false
+  # Denied: legacy Lambda tooling; the postinstall only prints warnings.
+  aws-sdk: false
+  # Denied: legacy Serverless Framework; not used by the Vercel build.
+  serverless: false

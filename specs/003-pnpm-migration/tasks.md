@@ -45,11 +45,11 @@ have the same priority, so this reorders nothing in priority terms.
 **Purpose**: Record the npm-era numbers that the success criteria are measured against,
 before anything changes.
 
-- [ ] T001 Confirm the working environment. `git branch --show-current` prints
+- [X] T001 Confirm the working environment. `git branch --show-current` prints
   `003-pnpm-migration`, `git status --short` is empty, and `node -v` prints `v24.x`. Run
   `corepack enable pnpm && pnpm -v`; Corepack may download pnpm. Note: `pnpm -v` only shows
   12.5.1 after T004 adds `packageManager`.
-- [ ] T002 Record the npm baselines in `specs/003-pnpm-migration/baseline.md` (new file). It
+- [X] T002 Record the npm baselines in `specs/003-pnpm-migration/baseline.md` (new file). It
   needs these sections:
   1. The HEAD commit hash, labelled "pre-switch commit".
   2. Unit coverage from `npx jest --coverage` on the current npm `node_modules`. Expected
@@ -78,17 +78,17 @@ targets. Every user story builds on this tree.
 
 ### 2A. Checkpoint lockfile (FR-001–FR-006, FR-010)
 
-- [ ] T004 In `package.json`:
+- [X] T004 In `package.json`:
   - add the top-level field `"packageManager": "pnpm@12.5.1"`;
   - extend `engines` to
     `{"node": "24.x", "pnpm": "12.x", "npm": "please-use-pnpm", "yarn": "please-use-pnpm"}`
     (see data-model §1);
   - delete the `prebuild` script. It calls an undeclared `rimraf`, and
     `nest-cli.json#compilerOptions.deleteOutDir` already clears `dist` (research R9).
-- [ ] T005 Generate the checkpoint lockfile. Run `pnpm import`, which reads
+- [X] T005 Generate the checkpoint lockfile. Run `pnpm import`, which reads
   `package-lock.json` and writes `pnpm-lock.yaml`. The file must start with
   `lockfileVersion: '9.0'`.
-- [ ] T006 [P] Create `pnpm-workspace.yaml` with only the build-script allowlist (research
+- [X] T006 [P] Create `pnpm-workspace.yaml` with only the build-script allowlist (research
   R5):
   ```yaml
   allowBuilds:
@@ -100,18 +100,18 @@ targets. Every user story builds on this tree.
   ```
   Add no `packages:` key. Add a one-line comment above each `false` entry saying why it is
   denied: funding banner, install telemetry, binary self-check.
-- [ ] T007 [P] Create `.npmrc` containing exactly `engine-strict=true` (research R8). It must
+- [X] T007 [P] Create `.npmrc` containing exactly `engine-strict=true` (research R8). It must
   contain no registry tokens.
-- [ ] T008 Declare the undeclared `dotenv` import used by `scripts/audit-user-roles.ts`. Run
+- [X] T008 Declare the undeclared `dotenv` import used by `scripts/audit-user-roles.ts`. Run
   `pnpm add -D --save-exact dotenv@16.4.5`; that is the version npm had hoisted (research
   R9).
-- [ ] T009 Refresh the lockfile so it records the pnpm pin (`packageManagerDependencies`).
+- [X] T009 Refresh the lockfile so it records the pnpm pin (`packageManagerDependencies`).
   Run `pnpm install`. Then check that a clean, non-interactive install succeeds:
   `rm -rf node_modules && CI=true pnpm install --frozen-lockfile </dev/null; echo $?` must
   print `0`. If it fails with `ERR_PNPM_IGNORED_BUILDS`, add the named package to
   `pnpm-workspace.yaml#allowBuilds` as `false`, unless it is a native addon the app needs at
   runtime.
-- [ ] T010 Verify there is no version drift (FR-003, SC-004, quickstart §2). Write a
+- [X] T010 Verify there is no version drift (FR-003, SC-004, quickstart §2). Write a
   throwaway Node script in the scratchpad that:
   1. reads every `name@version` from `pnpm-lock.yaml`'s `packages:` section;
   2. reads every `node_modules/**` entry's `version` from
@@ -121,10 +121,10 @@ targets. Every user story builds on this tree.
   Expected output: nothing, apart from `dotenv` now being a direct dependency at the same
   16.4.5. Spot-check that `typescript@5.6.3` and `prettier@3.2.5` are present. Record the
   result in `specs/003-pnpm-migration/baseline.md` under "Checkpoint drift check".
-- [ ] T011 Delete `package-lock.json`. In `.gitignore`, add `package-lock.json` and
+- [X] T011 Delete `package-lock.json`. In `.gitignore`, add `package-lock.json` and
   `yarn.lock` under a new `# Lockfiles from other package managers` comment. In
   `.prettierignore`, replace `package-lock.json` with `pnpm-lock.yaml`.
-- [ ] T012 Run gates 1–4. Expected: lint clean; unit tests 25 suites and 73 tests; e2e 5
+- [X] T012 Run gates 1–4. Expected: lint clean; unit tests 25 suites and 73 tests; e2e 5
   suites and 126 tests; build produces `dist/src/serverless.js`. Gate 5 is **expected to
   fail** at this point; record its counts in `baseline.md`. Then commit:
   - files: `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `.gitignore`,

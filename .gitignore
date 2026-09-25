@@ -2,6 +2,10 @@
 /dist
 /node_modules
 
+# Lockfiles from other package managers
+package-lock.json
+yarn.lock
+
 # Logs
 logs
 *.log
