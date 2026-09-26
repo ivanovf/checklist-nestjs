@@ -8,6 +8,6 @@
  * compiled handler.
  *
  * The `dist/src/...` path comes from tsc rooting the output at the project directory, because
- * `database.module.ts` and `lambda.ts` sit alongside `src/`.
+ * `database.module.ts` sits alongside `src/`.
  */
 module.exports = require('../dist/src/serverless').default;

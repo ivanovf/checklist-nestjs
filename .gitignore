@@ -44,11 +44,6 @@ lerna-debug.log*
 mongo_data/*
 .vercel
 
-# Serverless
-.serverless/
-.serverless_nextjs/
-.build/
-
 # TypeScript incremental build info
 *.tsbuildinfo
 

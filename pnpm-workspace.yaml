@@ -7,7 +7,3 @@ allowBuilds:
   '@scarf/scarf': false
   # Denied: the postinstall only runs a binary self-check.
   esbuild: false
-  # Denied: legacy Lambda tooling; the postinstall only prints warnings.
-  aws-sdk: false
-  # Denied: legacy Serverless Framework; not used by the Vercel build.
-  serverless: false

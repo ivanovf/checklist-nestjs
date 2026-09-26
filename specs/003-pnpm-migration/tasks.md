@@ -135,21 +135,21 @@ targets. Every user story builds on this tree.
 
 ### 2B. Legacy deploy target removal (FR-013, FR-015)
 
-- [ ] T013 [P] Delete the legacy target files: `git rm docker/Dockerfile .dockerignore
+- [X] T013 [P] Delete the legacy target files: `git rm docker/Dockerfile .dockerignore
   serverless.yml lambda.ts tsconfig.lambda.json Procfile static.json`. Also run
   `rm -rf .serverless docker`; `.serverless/` is untracked local state. **Do not delete**
   `database.module.ts`, because `src/app.module.ts` imports it, and do not delete
   `api/index.js`.
-- [ ] T014 [P] Remove the legacy-only scripts `predeploy`, `heroku-postbuild` and
+- [X] T014 [P] Remove the legacy-only scripts `predeploy`, `heroku-postbuild` and
   `build-lambda` from `package.json#scripts`. Afterwards, `grep -nE '"[^"]*": "[^"]*\bnpm\b'
   package.json` must return nothing (FR-010).
-- [ ] T015 Remove the dependencies that only the deleted files used. First confirm each has
+- [X] T015 Remove the dependencies that only the deleted files used. First confirm each has
   no importer:
   `grep -rnE "<pkg>" src test scripts api database.module.ts` must be empty for each.
   Then run:
   `pnpm remove @aws-sdk/client-lambda @codegenie/serverless-express @vendia/serverless-express aws-lambda serverless-http serverless-offline @types/aws-lambda`.
-- [ ] T016 In `.prettierignore`, remove the `.serverless/` line.
-- [ ] T017 Verify that the compiled entry path is unchanged (FR-015):
+- [X] T016 In `.prettierignore`, remove the `.serverless/` line.
+- [X] T017 Verify that the compiled entry path is unchanged (FR-015):
   1. Run `pnpm build`, then `ls dist/src/serverless.js dist/database.module.js`. Both must
      exist.
   2. Run `node -e "require('./api/index.js')"`. It must fail **only** with
