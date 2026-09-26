@@ -237,7 +237,7 @@ cold start.
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] In `vercel.json`, change **only** `installCommand`, to
+- [X] T025 [US2] In `vercel.json`, change **only** `installCommand`, to
   `"corepack enable pnpm && pnpm install --frozen-lockfile --prod=false"` (research R4).
   Leave `buildCommand` (`nest build`), `outputDirectory` (`public`), `functions` and
   `rewrites` byte-for-byte unchanged. Commit, for example "Install with the pinned pnpm on
@@ -291,34 +291,34 @@ since the checkpoint commit (quickstart §8).
 
 ### Implementation for User Story 4
 
-- [ ] T029 [US4] Re-measure the audit after the legacy removal. Run
+- [X] T029 [US4] Re-measure the audit after the legacy removal. Run
   `pnpm audit --json > <scratchpad>/audit-post-legacy.json` and count the unique high and
   critical advisories and packages. Expected: 49 advisories across 17 packages (research
   R3). Record the count in `baseline.md`. If the set differs from research R3's list,
   newer advisories have been published since the plan; add each new one to the remedy
   order in FR-017 before continuing.
-- [ ] T030 [US4] Remedy 1, same-major runtime and test bumps:
+- [X] T030 [US4] Remedy 1, same-major runtime and test bumps:
   1. `pnpm add mongoose@^8.24.4 @nestjs/common@^10.4.22 @nestjs/core@^10.4.22 @nestjs/platform-express@^10.4.22 class-validator@^0.14.4`
   2. `pnpm add -D @nestjs/testing@^10.4.22 supertest@^7.2.2`
   3. Run gates 1–4.
   4. Commit, for example "Upgrade mongoose, NestJS 10.4 and test deps to clear advisories".
      The body lists each from → to version and the advisory package it clears (research
      R3 table).
-- [ ] T031 [US4] Remedy 3, `bcrypt` major (it drops the `tar` advisory chain):
+- [X] T031 [US4] Remedy 3, `bcrypt` major (it drops the `tar` advisory chain):
   1. `pnpm add bcrypt@^6.0.0`
   2. Confirm `bcrypt … install: Done` in the install output.
   3. Run gates 1–4. The auth unit and e2e suites exercise `hash` and `compare`, and the
      `src/auth` coverage thresholds must still hold.
   4. Commit. The body notes that bcrypt 6 replaces node-pre-gyp with node-gyp-build and
      keeps the same `hash` and `compare` API.
-- [ ] T032 [US4] Remedy 3, build-tool major:
+- [X] T032 [US4] Remedy 3, build-tool major:
   1. `pnpm add -D @nestjs/cli@^11.0.24 @nestjs/schematics@^11.1.0`
   2. Confirm `pnpm why typescript` shows 5.9.3. This is expected, because the CLI pins it
      (research R3).
   3. Run gates 1–4. `nest build` must still apply the `@nestjs/swagger/plugin` from
      `nest-cli.json`: the `test/docs/` e2e checks pass.
   4. Commit. The body records the TypeScript 5.6.3 → 5.9.3 side effect.
-- [ ] T033 [US4] Remedy 2, same-major overrides. Add this `overrides:` block to
+- [X] T033 [US4] Remedy 2, same-major overrides. Add this `overrides:` block to
   `pnpm-workspace.yaml`, with a comment above it saying each entry is scoped to the
   vulnerable major and clears a high or critical advisory:
   ```yaml
@@ -339,7 +339,7 @@ since the checkpoint commit (quickstart §8).
   giving the entry format:
   `# - GHSA-xxxx-xxxx-xxxx  # <package>: no patched version exists; review YYYY-MM-DD`
   (research R7, FR-011). Then run `pnpm install`.
-- [ ] T034 [US4] Verify US4 is complete:
+- [X] T034 [US4] Verify US4 is complete:
   1. Gate 5, `pnpm audit --audit-level high`, exits 0 and reports 0 high and 0 critical.
      Record the moderate and low counts in `baseline.md` (SC-008).
   2. Run gates 1–4.

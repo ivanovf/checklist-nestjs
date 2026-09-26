@@ -7,3 +7,23 @@ allowBuilds:
   '@scarf/scarf': false
   # Denied: the postinstall only runs a binary self-check.
   esbuild: false
+
+# Each override is scoped to the vulnerable major and pins a patched release within that same
+# major. It clears a high or critical advisory in a transitive dependency.
+overrides:
+  brace-expansion@1: ^1.1.18
+  browserslist@4: ^4.28.7
+  flatted@3: ^3.4.2
+  js-yaml@3: ^3.15.2
+  js-yaml@4: ^4.3.2
+  jws@3: ^3.2.3
+  lodash@4: ^4.18.1
+  minimatch@3: ^3.1.4
+  multer@2: ^2.3.0
+  path-to-regexp@0.1: ^0.1.13
+  picomatch@2: ^2.3.2
+
+# Accepted advisories. Add one only when no patched version exists anywhere in its chain:
+# - GHSA-xxxx-xxxx-xxxx  # <package>: no patched version exists; review YYYY-MM-DD
+auditConfig:
+  ignoreGhsas: []

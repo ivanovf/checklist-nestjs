@@ -112,6 +112,40 @@ Prettier's `endOfLine: lf`. npm would fail the same way. The gates above ran in 
 made with `core.autocrlf=false`. Follow-up: add a `.gitattributes` with `* text=auto
 eol=lf`.
 
+## Advisory remediation (Story 4, SC-008)
+
+High and critical advisories from `pnpm audit --json`, counted per advisory:
+
+| Step | Commit | High + critical | Packages |
+|---|---|---|---|
+| Checkpoint | `64f5fa2` | 71 (66 high, 5 critical) | 23 |
+| Legacy removal (T029) | `5ec7737` | 49 (46, 3) | 17 |
+| Remedy 1: same-major bumps (T030) | `53d3744` | 46 (45, 1) | 14 |
+| Remedy 3: bcrypt 6 (T031) | `a8f18dd` | 37 (37, 0) | 13 |
+| Remedy 3: Nest CLI 11 (T032) | `f897eae` | 26 (26, 0) | 10 |
+| Remedy 2: overrides (T033) | this commit | **0** | 0 |
+
+The post-legacy set matches research R3 exactly, so no new advisory needed adding to the
+remedy order.
+
+Final `pnpm audit --audit-level high`: exit 0, 0 high, 0 critical,
+`auditConfig.ignoreGhsas` empty. Remaining: **11 moderate, 4 low** (research saw 8 and 1;
+more low-severity advisories have been published since). These are out of scope and
+listed as a follow-up.
+
+T034 checks:
+
+- Gates 1–4 pass: 73 of 73 unit (coverage still 71.78 / 41 / 38.34 / 69.55), 126 of 126
+  e2e, build OK.
+- `git diff --stat 64f5fa2..HEAD -- test 'src/**/*.spec.ts'` and `-- src` are both empty
+  (FR-018).
+- The direct range changes are exactly research R3, T008 and T015. `@nestjs/mapped-types`
+  is still `*`, `prettier` `^3.2.5`, `typescript` `^5.4.5`.
+- **TypeScript stays at 5.6.3.** Research expected pnpm to dedupe the project onto the
+  CLI's pinned 5.9.3. Instead the CLI keeps a private 5.9.3, and lint, jest and
+  `nest build` load the project's 5.6.3. The side effect doesn't happen, so the
+  "TypeScript 5.6 → 5.9" edit to CLAUDE.md no longer applies.
+
 ## Vercel baseline (SC-007)
 
 From the current production deployment, Deployment → Functions → `api/index.js`.
