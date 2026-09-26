@@ -176,7 +176,7 @@ the install.
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Rewrite the "Installation", "Running the app" and "Test" sections of
+- [X] T018 [P] [US1] Rewrite the "Installation", "Running the app" and "Test" sections of
   `README.md`:
   - Add a "Prerequisites" section: Node 24.x, then `corepack enable pnpm`.
   - Install becomes `pnpm install`.
@@ -185,17 +185,17 @@ the install.
   - Add a line for the audit gate: `pnpm audit --audit-level high`.
 
   Keep the NestJS badge links; they are registry URLs, not commands.
-- [ ] T019 [US1] Add a "Moving an existing clone from npm" section to `README.md`, after
+- [X] T019 [US1] Add a "Moving an existing clone from npm" section to `README.md`, after
   "Installation" (FR-014). It contains the three commands from
   contracts/developer-interface.md §3 and one sentence: `npm install` now fails on purpose.
   Also add a short "Adding dependencies" note: `pnpm add <pkg>`. If pnpm reports ignored
   build scripts, the new package must get an explicit `true` or `false` entry in
   `pnpm-workspace.yaml#allowBuilds`, and CI fails until it has one.
-- [ ] T020 [P] [US1] In `scripts/audit-user-roles.ts`, change the usage comment on line 11
+- [X] T020 [P] [US1] In `scripts/audit-user-roles.ts`, change the usage comment on line 11
   from `NODE_ENV=local npx ts-node scripts/audit-user-roles.ts` to
   `NODE_ENV=local pnpm exec ts-node scripts/audit-user-roles.ts`. Change nothing else in the
   file.
-- [ ] T021 [US1] Verify the npm guard (quickstart §1, spec Story 1 scenario 5). In a
+- [X] T021 [US1] Verify the npm guard (quickstart §1, spec Story 1 scenario 5). In a
   scratchpad copy of the repo with no `node_modules`, run `npm install`. It must exit
   non-zero with `notsup … "npm":"please-use-pnpm"`, and it must leave neither
   `package-lock.json` nor `node_modules` behind. Repeat with `npx --yes yarn install` if yarn
@@ -215,7 +215,7 @@ the install.
   2. Run `rm -rf node_modules && CI=true pnpm install --frozen-lockfile </dev/null`. It must
      exit 1 with `ERR_PNPM_IGNORED_BUILDS`.
   3. Restore the line with `git checkout pnpm-workspace.yaml` and reinstall.
-- [ ] T024 [US1] Commit the README and script-comment changes, for example "Document the
+- [X] T024 [US1] Commit the README and script-comment changes, for example "Document the
   pnpm workflow and the move from an npm clone".
 
 **Checkpoint**: US1's gates 1–4 are complete and local development runs entirely on pnpm.

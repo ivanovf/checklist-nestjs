@@ -26,36 +26,69 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Prerequisites
+
+- Node 24.x
+- pnpm, through Corepack (it ships with Node). Run this once per machine:
+
+```bash
+$ corepack enable pnpm
+```
+
+`package.json` pins the exact pnpm version, and Corepack picks it up.
+
 ## Installation
 
 ```bash
-$ npm install
+$ pnpm install
 ```
+
+## Moving an existing clone from npm
+
+`npm install` now fails on purpose; this project installs with pnpm only.
+
+```bash
+$ rm -rf node_modules
+$ corepack enable pnpm
+$ pnpm install
+```
+
+## Adding dependencies
+
+```bash
+$ pnpm add <pkg>
+```
+
+If pnpm reports ignored build scripts, give the new package an explicit `true` or `false`
+entry in `pnpm-workspace.yaml` under `allowBuilds`. CI fails until it has one.
 
 ## Running the app
 
 ```bash
 # development
-$ npm run start
+$ pnpm start
 
 # watch mode
-$ npm run start:dev
+$ pnpm start:dev
 
 # production mode
-$ npm run start:prod
+$ pnpm start:prod
 ```
 
 ## Test
 
 ```bash
 # unit tests
-$ npm run test
+$ pnpm test
 
 # e2e tests
-$ npm run test:e2e
+$ pnpm test:e2e
 
 # test coverage
-$ npm run test:cov
+$ pnpm test:cov
+
+# dependency audit
+$ pnpm audit --audit-level high
 ```
 
 ## Support
