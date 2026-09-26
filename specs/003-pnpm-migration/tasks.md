@@ -367,7 +367,7 @@ and a re-run hits the cache (quickstart §6). The SC-005 grep finds no npm comma
 
 ### Implementation for User Story 3
 
-- [ ] T035 [US3] Rewrite `.github/workflows/ci.yml`, following data-model §6 and keeping the
+- [X] T035 [US3] Rewrite `.github/workflows/ci.yml`, following data-model §6 and keeping the
   existing `name`, `on` and `concurrency` blocks and the constitution-gate comments:
   1. `actions/checkout@v4`
   2. `actions/setup-node@v4` with `node-version-file: package.json` and **no** `cache` key
@@ -382,7 +382,7 @@ and a re-run hits the cache (quickstart §6). The SC-005 grep finds no npm comma
      `pnpm audit --audit-level high`
 
   Update the job `name` to "Lint, test, e2e, build, audit".
-- [ ] T036 [P] [US3] Update `CLAUDE.md`:
+- [X] T036 [P] [US3] Update `CLAUDE.md`:
   - **Stack & decisions:** TypeScript 5.6 → 5.9; add "pnpm 12 via Corepack
     (`packageManager` pinned)"; the Deploy bullet says Vercel is the only target.
   - **Run & test locally:** every `npm run X` becomes `pnpm X`, and `npm test` becomes
@@ -391,7 +391,7 @@ and a re-run hits the cache (quickstart §6). The SC-005 grep finds no npm comma
   - **Conventions:** the five gates are lint, test, e2e, build and audit, all enforced in CI.
   - Add one line: install scripts run only for packages allowed in
     `pnpm-workspace.yaml#allowBuilds`.
-- [ ] T037 [P] [US3] Amend `.specify/memory/constitution.md` as a PATCH, 1.0.0 → 1.0.1
+- [X] T037 [P] [US3] Amend `.specify/memory/constitution.md` as a PATCH, 1.0.0 → 1.0.1
   (FR-012, FR-016):
   - line 32: "(AWS Lambda, Vercel)" → "(Vercel)";
   - line 96: "`npm audit`" → "`pnpm audit --audit-level high`";
@@ -404,11 +404,11 @@ and a re-run hits the cache (quickstart §6). The SC-005 grep finds no npm comma
     manager and deploy target changed, and no requirement changed), no principles
     added or removed;
   - update the footer: `**Last Amended**: 2026-09-21`, version 1.0.1.
-- [ ] T038 [US3] Verify there are no npm instructions left (SC-005, quickstart §7). Run
+- [X] T038 [US3] Verify there are no npm instructions left (SC-005, quickstart §7). Run
   `git grep -nE '\bnpm (i|install|ci|run|test|audit)\b|\bnpx\b' -- . ':!specs/001-*' ':!specs/002-*'`.
   Every remaining match must be inside `specs/003-pnpm-migration/`. Fix any other match
   before continuing.
-- [ ] T039 [US3] Commit the CI, CLAUDE.md and constitution changes as **two** commits:
+- [X] T039 [US3] Commit the CI, CLAUDE.md and constitution changes as **two** commits:
   1. CI, for example "Run all five gates with pnpm in CI". The body cites the constitution's
      "enforced by CI, not by memory" rule.
   2. CLAUDE.md and the constitution, for example "Point project guidance and the
