@@ -453,7 +453,7 @@ developers and Vercel install.
      - the remaining moderate and low advisories.
 
   End the description with the PR attribution line from the session instructions.
-- [ ] T043 [P] Mark every requirement FR-001 to FR-018 and every success criterion SC-001 to
+- [X] T043 [P] Mark every requirement FR-001 to FR-018 and every success criterion SC-001 to
   SC-008 as met, blocked or not applicable in `specs/003-pnpm-migration/baseline.md`, each
   with the task that shows it. Commit this with any outstanding `baseline.md` updates.
 - [ ] T044 Run the whole of [quickstart.md](./quickstart.md) one last time from a fresh clone

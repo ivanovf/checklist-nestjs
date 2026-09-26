@@ -146,6 +146,40 @@ T034 checks:
   `nest build` load the project's 5.6.3. The side effect doesn't happen, so the
   "TypeScript 5.6 → 5.9" edit to CLAUDE.md no longer applies.
 
+## Requirement status (T043)
+
+Status on the local tree after `f5c3060`. "Pending" means the check needs a push, a
+Vercel preview or the PR, none of which has happened yet.
+
+| Id | Status | Evidence |
+|---|---|---|
+| FR-001 | Met | `packageManager: pnpm@12.5.1`, lockfile `packageManagerDependencies` (T004, T009) |
+| FR-002 | Met | `pnpm-lock.yaml` committed; `package-lock.json` deleted and ignored, as is `yarn.lock` (T005, T011) |
+| FR-003 | Met, with a noted deviation | Drift check: 890 packages, no new version; 3 nested duplicates folded (T010) |
+| FR-004 | Met | npm and yarn refused, nothing written (T021) |
+| FR-005 | Met | `allowBuilds`; an unlisted `esbuild` fails the install (T006, T023) |
+| FR-006 | Met | `dotenv` declared; `prebuild`/`rimraf` removed; gates pass with no hoisting (T004, T008) |
+| FR-007 | Met in config; preview pending | `vercel.json#installCommand` (T025); preview T026 |
+| FR-008 | Pending | Preview cold-start logs (T028). Locally, the shim bootstraps with no missing module (T017) |
+| FR-009 | Met in config; CI run pending | `ci.yml` (T035); PR run T040 |
+| FR-010 | Met | No package script calls npm (T014) |
+| FR-011 | Met | `pnpm audit --audit-level high` exits 0; `auditConfig.ignoreGhsas` empty with a documented format (T033, T034) |
+| FR-012 | Met | README, CLAUDE.md, script comment, constitution gates (T018–T020, T036, T037) |
+| FR-013 | Met | Legacy files, scripts and 7 dependencies removed (T013–T015) |
+| FR-014 | Met | README "Moving an existing clone from npm" (T019) |
+| FR-015 | Met | `dist/src/serverless.js` unchanged; shim loads (T017) |
+| FR-016 | Met | Constitution 1.0.1 drops Lambda (T037). Needs owner approval in the PR |
+| FR-017 | Met | Remedies 1 → 3 → 2 applied in order; no advisory accepted (T030–T033) |
+| FR-018 | Met | No `test/`, spec or `src/` change since the checkpoint; 126 e2e including `test/docs/` pass (T034) |
+| SC-001 | Partly met | Fresh clone: install and all five gates pass (T022, T034). The running API is blocked here by the lack of a local MongoDB |
+| SC-002 | Pending | Vercel preview (T026, T028) |
+| SC-003 | Met | Coverage identical: 71.78 / 41 / 38.34 / 69.55 (T002, T022, T034) |
+| SC-004 | Met, with a noted deviation | Same as FR-003 (T010) |
+| SC-005 | Met | Only intentional matches remain: the README migration sentence and a generic example in a skill file (T038) |
+| SC-006 | Pending | CI cache re-run (T040) |
+| SC-007 | Pending | Needs the maintainer's Vercel baseline (T003) and the preview (T041) |
+| SC-008 | Met | 0 high, 0 critical (from 22 high and 5 critical under npm) (T034) |
+
 ## Vercel baseline (SC-007)
 
 From the current production deployment, Deployment → Functions → `api/index.js`.
