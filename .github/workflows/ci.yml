@@ -11,31 +11,49 @@ concurrency:
 
 jobs:
   verify:
-    name: Lint, test, build
+    name: Lint, test, e2e, build, audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      # No `cache` here: pnpm is not on the PATH until Corepack enables it below.
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-          cache: npm
+
+      # Corepack installs the exact pnpm pinned in package.json#packageManager.
+      - name: Enable pnpm
+        run: corepack enable pnpm
+
+      - name: Locate the pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       # Constitution gate 1
       - name: Lint
-        run: npm run lint:ci
+        run: pnpm lint:ci
 
       # Constitution gate 2 — unit tests and coverage thresholds
       - name: Unit tests
-        run: npm test -- --coverage
+        run: pnpm test -- --coverage
 
       # Constitution gate 3 — end-to-end tests
       - name: End-to-end tests
-        run: npm run test:e2e
+        run: pnpm test:e2e
 
       # Constitution gate 4
       - name: Build
-        run: npm run build
+        run: pnpm build
+
+      # Constitution gate 5 — no high or critical advisories
+      - name: Dependency audit
+        run: pnpm audit --audit-level high
