@@ -200,7 +200,7 @@ the install.
   non-zero with `notsup … "npm":"please-use-pnpm"`, and it must leave neither
   `package-lock.json` nor `node_modules` behind. Repeat with `npx --yes yarn install` if yarn
   is reachable; otherwise note it as skipped.
-- [ ] T022 [US1] Validate a fresh clone (quickstart §3, SC-001):
+- [X] T022 [US1] Validate a fresh clone (quickstart §3, SC-001):
   1. `git clone` the branch into the scratchpad and follow **only** the README as rewritten
      in T018 and T019.
   2. Run gates 1–4 there. Unit coverage must equal the T002 baseline (SC-003). Gate 5 is
@@ -210,7 +210,7 @@ the install.
      reachable MongoDB. `curl -s localhost:3000/api/health` must return 200 with the
      database reachable. If there is no local MongoDB, record this sub-step as blocked,
      with the reason.
-- [ ] T023 [US1] Verify the allowlist is enforced (quickstart §4, FR-005):
+- [X] T023 [US1] Verify the allowlist is enforced (quickstart §4, FR-005):
   1. Remove the `esbuild` line from `pnpm-workspace.yaml`.
   2. Run `rm -rf node_modules && CI=true pnpm install --frozen-lockfile </dev/null`. It must
      exit 1 with `ERR_PNPM_IGNORED_BUILDS`.

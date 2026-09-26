@@ -83,6 +83,35 @@ high and critical advisories across 23 packages: `@hapi/content`, `axios`,
 `path-to-regexp`, `picomatch`, `serialize-javascript`, `tar`, `tmp`, `validator`,
 `velocityjs`, `ws`.
 
+## Legacy removal (T017)
+
+- `pnpm build` emits `dist/src/serverless.js` and `dist/database.module.js`.
+- `require('./api/index.js')` loads with exit 0. The app bootstraps lazily on the first
+  request, so the handler was also invoked once. It passed env validation (the local env
+  files are present) and was still waiting on MongoDB after 20 s. That means the whole
+  module graph loaded through pnpm's `node_modules` with no `Cannot find module`. The
+  task expected a `Config validation error` instead; the missing-module check is what
+  FR-015 needs, and it holds.
+- Gates 1–4: lint clean, 73 of 73 unit, 126 of 126 e2e, build OK.
+
+## Story 1 checks (local)
+
+| Check | Result |
+|---|---|
+| T021 npm guard (npm 12.1.0) | exit 1, `notsup … "npm":"please-use-pnpm"`. No `package-lock.json`, no `node_modules` |
+| T021 yarn guard (yarn 1.22.22 via `npx`) | exit 1. Refused through `packageManager` ("defines yarn@pnpm@12.5.1"). No `yarn.lock`, no `node_modules` |
+| T022 fresh clone, install from README | `pnpm install` OK, `mongodb-memory-server postinstall: Done`, bcrypt built |
+| T022 unit coverage (SC-003) | 71.78 / 41 / 38.34 / 69.55, identical to the npm baseline |
+| T022 gates 1–4 | lint clean, 73 of 73, 126 of 126, build OK (see the line-ending note below) |
+| T022 running app + `/api/health` | **Blocked**: no MongoDB is reachable on this machine (no local mongod, Docker not installed), and `.env.local` points at localhost |
+| T023 allowlist enforcement | without the `esbuild` entry: exit 1, `ERR_PNPM_IGNORED_BUILDS … esbuild@0.23.1`. Restored: exit 0 |
+
+**Line-ending note (pre-existing, not caused by pnpm).** On Windows with
+`core.autocrlf=true`, a fresh clone checks files out with CRLF, and `lint:ci` fails on
+Prettier's `endOfLine: lf`. npm would fail the same way. The gates above ran in a clone
+made with `core.autocrlf=false`. Follow-up: add a `.gitattributes` with `* text=auto
+eol=lf`.
+
 ## Vercel baseline (SC-007)
 
 From the current production deployment, Deployment → Functions → `api/index.js`.
