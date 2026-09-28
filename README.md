@@ -66,6 +66,23 @@ the connection indefinitely and never finishes starting, so no route answers at 
 Data lives in a Docker-managed volume, not in the working tree, so nothing database-shaped can
 be committed by accident.
 
+## API contract
+
+`openapi.json` at the repository root describes every route: its inputs, the body it
+returns, and the errors it can answer. Clients (the Flutter app) and AI agents can read it
+without cloning dependencies, starting a database, or running the service.
+
+```bash
+pnpm docs:export   # rebuild and regenerate openapi.json; no database needed
+pnpm docs:check    # compare the current build with the committed file (CI runs this)
+```
+
+Commit the regenerated file with any change to a route. Where a route behaves differently
+from what its code suggests, the contract describes the real behaviour, and
+`specs/005-openapi-contract-export/discrepancies.md` records the difference.
+
+The browsable version is served at `http://localhost:3000/docs` while the API runs locally.
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.

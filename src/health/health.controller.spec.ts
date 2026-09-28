@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 import { HealthController } from './health.controller';
+import { routeOf } from '../common/testing/route-metadata';
 import { HealthService } from './health.service';
 
 /**
@@ -63,5 +64,17 @@ describe('HealthController', () => {
         'database',
       ]);
     }
+  });
+});
+
+// Routing and access declarations (constitution Principle I).
+describe('HealthController routes', () => {
+  it('reports health at a public GET /health', () => {
+    expect(routeOf(HealthController, 'check')).toEqual({
+      method: 'GET',
+      path: '/health',
+      roles: undefined,
+      isPublic: true,
+    });
   });
 });

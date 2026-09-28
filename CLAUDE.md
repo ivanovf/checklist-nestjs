@@ -18,10 +18,11 @@ corepack enable pnpm        # once per machine
 pnpm install
 pnpm db:setup               # Docker Mongo on a named volume + seed dev.admin@localhost.test
 pnpm start:dev              # http://localhost:3000/api, docs at /docs
-pnpm lint:ci && pnpm test && pnpm test:e2e && pnpm build && pnpm audit --audit-level high
+pnpm lint:ci && pnpm test && pnpm test:e2e && pnpm build && pnpm docs:check && pnpm audit --audit-level high
 ```
 - The e2e suite uses `mongodb-memory-server` and must stay `--runInBand` (one shared mongod).
 - `pnpm db:reset` wipes the local volume.
+- `pnpm docs:export` rebuilds and writes `openapi.json`, the committed API contract. It needs no database. `pnpm docs:check` compares the current build with it; CI runs it in the Build step.
 
 ## Conventions
 - Spec Kit flow per feature: `/speckit-specify → clarify → plan → tasks → analyze → implement`, with artifacts in `specs/NNN-name/`.
@@ -29,7 +30,8 @@ pnpm lint:ci && pnpm test && pnpm test:e2e && pnpm build && pnpm audit --audit-l
 - Commits: imperative summary line, no `feat:`/`fix:` prefix, and a body that explains why.
 - Test-first. Coverage floors are 80% overall and 90% for `src/auth`. The five gates are lint, test, e2e, build, and audit, all enforced in CI.
 - Layering: controllers are HTTP-only, services own rules and are the only layer that touches models, and responses are projected through DTOs. No `any`.
-- Every endpoint needs `@ApiTags`, `@ApiOperation`, a success response, and `@ApiRefusals(...)`. Document only statuses the route really returns; `test/docs/` enforces this.
+- Every endpoint needs `@ApiTags`, `@ApiOperation`, a success response with its body type (documentation-only `*-response.dto.ts` classes), and `@ApiRefusals(...)` from `src/common/decorators/`. Document only statuses the route really returns. `test/docs/` enforces this: completeness, agreement with the authorization matrix, a sample called for real, and one test per recorded discrepancy.
+- A change to any route's inputs, outputs or access must regenerate and commit `openapi.json` in the same PR. Where behaviour and apparent intent disagree, the contract states the behaviour and `specs/005-openapi-contract-export/discrepancies.md` records the gap.
 - Verify behaviour by running it, not by reading the source. Several by-id routes return 200 with an empty body despite code that looks like it throws 404.
 
 The product rules live in .specify/memory/constitution.md

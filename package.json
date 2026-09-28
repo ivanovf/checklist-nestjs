@@ -24,6 +24,8 @@
     "db:reset": "docker compose --env-file .env.local down -v",
     "db:seed": "ts-node scripts/seed-dev-admin.ts",
     "db:setup": "pnpm db:up && pnpm db:seed",
+    "docs:export": "nest build && node dist/src/openapi/export.js",
+    "docs:check": "node dist/src/openapi/export.js --check",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "lint:ci": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings=0",
     "test": "jest",
@@ -102,7 +104,8 @@
       "**/*.(t|j)s",
       "!**/*.spec.ts",
       "!**/*.module.ts",
-      "!main.ts"
+      "!main.ts",
+      "!openapi/export.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",

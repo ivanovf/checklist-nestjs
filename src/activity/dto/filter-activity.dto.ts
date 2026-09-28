@@ -1,23 +1,20 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsMongoId, IsOptional } from 'class-validator';
 import { ActivityStatus } from '../entities/activity-status.enum';
 
 export class FilterActivityDto {
-  @ApiProperty()
+  @ApiPropertyOptional({ description: 'Activity type id.' })
   @IsMongoId()
   @IsOptional()
   readonly type: string;
 
   @IsEnum(ActivityStatus)
-  @ApiProperty({
-    enum: ActivityStatus,
-    default: ActivityStatus.TODO,
-  })
+  @ApiPropertyOptional({ enum: ActivityStatus })
   @IsOptional()
   readonly status: ActivityStatus;
 
   @IsNumber()
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   readonly price: number;
 }

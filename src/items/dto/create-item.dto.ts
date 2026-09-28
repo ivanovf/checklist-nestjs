@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class CreateItemDto {
@@ -13,7 +13,7 @@ export class CreateItemDto {
   readonly status: boolean;
 
   @IsBoolean()
-  @ApiProperty()
+  @ApiPropertyOptional({ default: false })
   readonly checked = false;
 
   @IsString()
@@ -21,7 +21,7 @@ export class CreateItemDto {
   readonly description: string;
 
   @IsString()
-  @ApiProperty()
+  @ApiPropertyOptional({ default: '' })
   readonly comments = '';
 
   @IsString()

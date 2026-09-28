@@ -1,8 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AppService } from './app.service';
 import { Public } from './common/decorators/public.decorator';
+import { AppInfoResponseDto } from './app-info-response.dto';
 
 @ApiTags('Health')
 @Controller()
@@ -15,6 +16,11 @@ export class AppController {
    */
   @Public()
   @Get()
+  @ApiOperation({ summary: 'Identify the service' })
+  @ApiOkResponse({
+    type: AppInfoResponseDto,
+    description: 'The service name and version.',
+  })
   getHome(): object {
     return this.appService.getHome();
   }

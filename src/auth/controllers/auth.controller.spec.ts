@@ -4,6 +4,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 
 import { AuthController } from './auth.controller';
+import { routeOf } from '../../common/testing/route-metadata';
 import { AuthService } from '../services/auth.service';
 import { User } from '../../users/entities/user.entity';
 
@@ -86,6 +87,28 @@ describe('AuthController', () => {
       await expect(controller.validateToken('Bearer expired')).rejects.toThrow(
         'Invalid token',
       );
+    });
+  });
+});
+
+// Routing and access declarations (constitution Principle I). Enforcement is proven end to
+// end by the authorization matrix suite.
+describe('AuthController routes', () => {
+  it('signs in with a public POST /login', () => {
+    expect(routeOf(AuthController, 'login')).toEqual({
+      method: 'POST',
+      path: '/login',
+      roles: undefined,
+      isPublic: true,
+    });
+  });
+
+  it('checks tokens with GET /login/validate, which is not public', () => {
+    expect(routeOf(AuthController, 'validateToken')).toEqual({
+      method: 'GET',
+      path: '/login/validate',
+      roles: undefined,
+      isPublic: false,
     });
   });
 });
