@@ -148,7 +148,7 @@ d. Where the controller spec is definedness-only, replace it with tests assertin
   - `POST /api/activity-type` (admin);
   - `PATCH /api/config/:id` (device, with the key).
 - [X] T027 [US2] Create `test/docs/contract-discrepancies.e2e-spec.ts` (check 7): one test per `discrepancies.md` entry, reproducing the observed behaviour. For example, D1: `GET /api/users/all` without `limit` returns 400; D2: `GET /api/items/<unknown ObjectId>` returns 200 with an empty body; D3: a user record includes `__v`. Each test name starts with its `D<n>`. Fill each entry's Evidence in `discrepancies.md` with the test name
-- [ ] T028 [US2] Open one GitHub issue per `discrepancies.md` entry (except D4, fixed by T038) with `gh issue create --label bug`. The title is `D<n>: <operation> <observed vs intent>`, and the body links to the register entry and the proving test. Record each issue number in the entry's Issue field (FR-011)
+- [X] T028 [US2] Open one GitHub issue per `discrepancies.md` entry (except D4, fixed by T038) with `gh issue create --label bug`. The title is `D<n>: <operation> <observed vs intent>`, and the body links to the register entry and the proving test. Record each issue number in the entry's Issue field (FR-011)
 
 **Checkpoint**: the contract is accurate and proven where FR-015 requires.
 

@@ -29,7 +29,7 @@ the contract, this entry, and the test together.
   `undefined` before the parameter default applies
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D1: …", and every list route in `test/docs/pagination-query.e2e-spec.ts`
 - **Principle**: —
-- **Issue**: pending (T028)
+- **Issue**: #7
 
 ## D2 — An unknown id is answered as success
 
@@ -47,7 +47,7 @@ the contract, this entry, and the test together.
   against an unawaited query, a check that can never fire
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › both "D2: …" tests (unknown item: GET 200 empty, DELETE 200 `{deleted: true}`)
 - **Principle**: IV (errors as Nest HTTP exceptions with a consistent shape)
-- **Issue**: pending (T028)
+- **Issue**: #8
 
 ## D3 — Stored records are returned unprojected
 
@@ -58,7 +58,7 @@ the contract, this entry, and the test together.
 - **Apparent intent**: responses projected through a DTO or serializer
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D3: …"
 - **Principle**: II ("Mongoose documents MUST NOT be returned raw from controllers")
-- **Issue**: pending (T028)
+- **Issue**: #9
 
 ## D4 — Query values are bound without a typed input shape
 
@@ -84,7 +84,7 @@ the contract, this entry, and the test together.
 - **Apparent intent**: unknown fields rejected
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D5: …"
 - **Principle**: IV ("MUST run with `whitelist: true` and `forbidNonWhitelisted: true`")
-- **Issue**: pending (T028)
+- **Issue**: #10
 
 ## D6 — Some list routes are unbounded
 
@@ -95,7 +95,7 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D6: …"
 - **Principle**: V ("Every list endpoint MUST be paginated … Unbounded `find()` … is
   prohibited")
-- **Issue**: pending (T028)
+- **Issue**: #11
 
 ## D7 — A malformed id is a server error
 
@@ -109,7 +109,7 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D7: …"
 - **Principle**: IV ("Raw driver, Mongoose … details MUST NOT reach clients"; errors as
   consistent HTTP exceptions)
-- **Issue**: pending (T028)
+- **Issue**: #12
 
 ## D8 — Some invalid update bodies are server errors
 
@@ -120,7 +120,7 @@ the contract, this entry, and the test together.
 - **Contract**: documents 400 (which valid-typed invalid input does produce), not 500
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D8: …"
 - **Principle**: IV
-- **Issue**: pending (T028)
+- **Issue**: #13
 
 ## D9 — Updating a user requires every field
 
@@ -132,7 +132,7 @@ the contract, this entry, and the test together.
 - **Contract**: documents the body as it is, with all fields required
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D9: …"
 - **Principle**: —
-- **Issue**: pending (T028)
+- **Issue**: #14
 
 ## D10 — The device route refuses a wrong key with 404, and also needs a sign-in
 
@@ -147,7 +147,7 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D10: …"
 - **Principle**: III (explicit, centrally enforced controls: the key check lives in a
   service, not a guard)
-- **Issue**: pending (T028)
+- **Issue**: #15
 
 ## D11 — Paging on the reservation list is unusable
 
@@ -161,7 +161,7 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D11: …"
 - **Principle**: V (lists paginated with a bounded default): the default still applies,
   but callers cannot page
-- **Issue**: pending (T028)
+- **Issue**: #16
 
 ## D12 — An invalid role is a server error
 
@@ -171,7 +171,7 @@ the contract, this entry, and the test together.
 - **Apparent intent**: 400
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D12: …"
 - **Principle**: IV
-- **Issue**: pending (T028)
+- **Issue**: #17
 
 ## D13 — Duplicate email addresses are accepted ⚠️ security
 
@@ -182,7 +182,7 @@ the contract, this entry, and the test together.
 - **Apparent intent**: one account per email (409 or 400 on a duplicate)
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D13: …"
 - **Principle**: III
-- **Issue**: pending (T028)
+- **Issue**: #18
 
 ## D14 — Dead device guard with a hardcoded credential ⚠️ security
 
@@ -194,7 +194,7 @@ the contract, this entry, and the test together.
 - **Contract**: nothing to document, because no route uses it
 - **Evidence**: source reading. It is dead code, so there is no behaviour to execute
 - **Principle**: III ("Hardcoded credentials are a blocking defect, not a cleanup item")
-- **Issue**: pending (T028)
+- **Issue**: #19
 
 
 ## D15 — A reservation's lock user is accepted and discarded
@@ -208,4 +208,4 @@ the contract, this entry, and the test together.
   user field in the response, because none is ever returned
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D15: …"
 - **Principle**: —
-- **Issue**: pending (T028)
+- **Issue**: #20
