@@ -128,7 +128,7 @@ project's `^5.4.5` onto it. The range is unchanged and all gates pass. CLAUDE.md
 **Decision**: In `vercel.json`:
 
 ```text
-"installCommand": "corepack enable pnpm && pnpm install --frozen-lockfile --prod=false"
+"installCommand": "corepack enable pnpm && pnpm install --frozen-lockfile --config.production=false"
 ```
 
 `buildCommand` (`nest build`), `outputDirectory` (`public`), `functions` and `rewrites`
@@ -139,9 +139,14 @@ stay unchanged.
   An older pnpm does not read pnpm 12's `allowBuilds`, so **`bcrypt` would not be built**,
   and the function would fail at runtime. Running Corepack explicitly makes the pinned
   12.5.1 the one that installs.
-- `--prod=false` is the pnpm equivalent of today's `--include=dev`. It was verified with
-  `NODE_ENV=production`: dev dependencies, including the `nest` binary the build needs, are
-  installed.
+- `--config.production=false` is the pnpm equivalent of today's `--include=dev`: Vercel
+  installs with `NODE_ENV=production`, and the build needs dev dependencies such as
+  `typescript`. The first choice, `--prod=false`, was recorded here as verified locally, but the
+  pnpm 12.5.1 CLI rejects it ("unexpected value 'false' for '--prod'"), which failed every
+  preview deploy. Under 12.5.1 with `NODE_ENV=production`, `--config.production=false`
+  installs the same tree as a plain install (dev dependencies included); the flag is kept
+  so the intent does not rest on a default. Do not use `--dev`: it drops production
+  dependencies.
 - `--frozen-lockfile` fails the deploy if the lockfile and `package.json` disagree.
 
 **Evidence from local runs**:
@@ -160,7 +165,7 @@ pnpm's symlinked store. Both are covered by the preview-deploy checks in
 **Fallback if `corepack enable` is refused in the build image**: set the Vercel project
 environment variable `ENABLE_EXPERIMENTAL_COREPACK=1`, which makes Vercel honour
 `packageManager`, and set `installCommand` to `pnpm install --frozen-lockfile
---prod=false`. That setting lives in the dashboard, which departs from the spec's
+--config.production=false`. That setting lives in the dashboard, which departs from the spec's
 "`vercel.json` is the source of truth" assumption, so it is the fallback, not the primary
 approach.
 

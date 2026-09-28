@@ -8,7 +8,7 @@
  *
  * This reports; it does not write. Correct any account it names before trusting the constraint.
  *
- * Usage:  NODE_ENV=local npx ts-node scripts/audit-user-roles.ts
+ * Usage:  NODE_ENV=local pnpm exec ts-node scripts/audit-user-roles.ts
  */
 import { config as loadEnv } from 'dotenv';
 import mongoose from 'mongoose';

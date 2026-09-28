@@ -1,6 +1,30 @@
 <!--
 Sync Impact Report
 ==================
+Version change: 1.0.0 → 1.0.1
+Bump rationale: PATCH. The package manager changed from npm to pnpm, and the deploy
+targets narrowed to Vercel after the Lambda, Serverless and Heroku targets were removed
+(spec 003-pnpm-migration). Gate commands and deployment wording are updated to match.
+What is required does not change.
+
+Modified principles:
+  III. Secure By Default: the audit gate command is now `pnpm audit --audit-level high`
+  V. Observability & Performance Budgets: "Lambda and Vercel" → "Vercel serverless functions"
+
+Modified sections:
+  Preamble: deploy targets "(AWS Lambda, Vercel)" → "(Vercel)"
+  Security & Data Protection Standards: deployment artifacts are the Vercel build and
+    function bundle
+  Development Workflow & Quality Gates: gates 1–5 are the pnpm commands
+
+Added sections: none
+Removed sections: none
+Principles added or removed: none
+
+Deferred TODOs: none
+
+------------------------------------------------------------------
+
 Version change: (unversioned template scaffold) → 1.0.0
 Bump rationale: MAJOR/initial — first concrete ratification. The previous file was an
 unfilled `[PLACEHOLDER]` scaffold with no governing content, so every principle and
@@ -29,7 +53,7 @@ because no earlier ratified version of this document exists in the repository hi
 The Chalet Checklist API is a NestJS + MongoDB service that stores chalet reservations,
 checklists, activities, locks, items, and configuration. It is a small-team, private
 service handling guest reservation data, and it is deployed to serverless targets
-(AWS Lambda, Vercel). Every rule below is written for that reality.
+(Vercel). Every rule below is written for that reality.
 
 ## Core Principles
 
@@ -93,7 +117,7 @@ Security controls MUST be explicit, centrally enforced, and free of embedded sec
   `enableCors()` with no options is prohibited outside local development.
 - Security headers (Helmet or equivalent) and rate limiting on authentication endpoints
   MUST be enabled in every deployed environment.
-- Dependencies MUST pass `npm audit` with no unresolved high or critical advisories before
+- Dependencies MUST pass `pnpm audit --audit-level high` with no unresolved high or critical advisories before
   a release; an accepted advisory MUST be recorded with its justification and a review date.
 
 *Rationale*: This service exposes guest reservation data over the public internet with a
@@ -133,7 +157,7 @@ Performance and diagnosability are requirements, not tuning done after complaint
 - Performance budgets: read endpoints p95 under 300 ms and write endpoints p95 under 500 ms
   measured server-side, excluding cold start. A change that pushes an endpoint past its
   budget MUST be fixed or explicitly waived in the PR.
-- Because the service runs on Lambda and Vercel, the MongoDB connection MUST be reused
+- Because the service runs on Vercel serverless functions, the MongoDB connection MUST be reused
   across invocations rather than re-established per request, and a health endpoint MUST
   report database reachability.
 - N+1 query patterns are prohibited; related data MUST be fetched with aggregation,
@@ -154,7 +178,7 @@ in ways that are invisible locally and expensive in production.
   at least 32 bytes. Tokens MUST NOT carry sensitive claims beyond identity and role.
 - Database credentials MUST be least-privilege per environment, and production credentials
   MUST NOT be usable from a developer machine.
-- Deployment artifacts (Docker image, Lambda bundle, Vercel build) MUST NOT embed secrets;
+- Deployment artifacts (the Vercel build and function bundle) MUST NOT embed secrets;
   they are injected at runtime.
 - Any change under `src/auth/**` requires explicit security review before merge.
 
@@ -162,11 +186,11 @@ in ways that are invisible locally and expensive in production.
 
 The following gates MUST pass before any change merges to `main`:
 
-1. `npm run lint` — clean, no rule disabled inline without a comment naming the reason.
-2. `npm test` — all unit specs pass and coverage thresholds from Principle I hold.
-3. `npm run test:e2e` — end-to-end suite passes.
-4. `npm run build` — compiles with no TypeScript errors.
-5. `npm audit` — no unresolved high or critical advisories.
+1. `pnpm lint:ci` — clean, no rule disabled inline without a comment naming the reason.
+2. `pnpm test` — all unit specs pass and coverage thresholds from Principle I hold.
+3. `pnpm test:e2e` — end-to-end suite passes.
+4. `pnpm build` — compiles with no TypeScript errors.
+5. `pnpm audit --audit-level high` — no unresolved high or critical advisories.
 
 Additional workflow rules:
 
@@ -205,4 +229,4 @@ than silently ignored. This constitution is reviewed at least once every six mon
 `CLAUDE.md` (when present) carries the runtime development guidance that operationalizes
 these rules for agents working in this repository.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-07 | **Last Amended**: 2026-09-07
+**Version**: 1.0.1 | **Ratified**: 2026-09-07 | **Last Amended**: 2026-09-26

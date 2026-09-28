@@ -2,6 +2,10 @@
 /dist
 /node_modules
 
+# Lockfiles from other package managers
+package-lock.json
+yarn.lock
+
 # Logs
 logs
 *.log
@@ -39,11 +43,6 @@ lerna-debug.log*
 *.env.*
 mongo_data/*
 .vercel
-
-# Serverless
-.serverless/
-.serverless_nextjs/
-.build/
 
 # TypeScript incremental build info
 *.tsbuildinfo

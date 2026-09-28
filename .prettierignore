@@ -1,5 +1,4 @@
 node_modules/
 dist/
 coverage/
-.serverless/
-package-lock.json
+pnpm-lock.yaml
