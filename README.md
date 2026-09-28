@@ -22,6 +22,50 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## Local development
+
+The API needs a MongoDB instance. A Compose file provisions one that matches the settings the
+application already expects, so no database engine has to be installed on your machine.
+
+```bash
+cp env.example .env.local   # workable as-is; nothing needs filling in
+pnpm install                # see Prerequisites below for Corepack
+pnpm db:setup            # starts MongoDB, waits until healthy, seeds an admin account
+pnpm start:dev           # the API, in a second terminal
+```
+
+Check it worked:
+
+```bash
+curl localhost:3000/api/health     # {"status":"ok","database":"up"}
+```
+
+Sign in with the seeded account — `dev.admin@localhost.test` / `localdevadmin`. These are
+synthetic, published here on purpose, and must never be reused anywhere a deployment can
+reach. The account exists because the API cannot bootstrap its own first administrator:
+creating an account requires an administrator, and signing in requires an account that
+already exists.
+
+### Order matters
+
+**Start the database before the API.** If the API starts first it does not fail — it retries
+the connection indefinitely and never finishes starting, so no route answers at all, not even
+`/api/health`. A silent, hanging process is the symptom; it is not a broken application. Run
+`pnpm db:up`, then restart.
+
+### Commands
+
+| Command | Does |
+|---|---|
+| `pnpm db:setup` | `db:up` then `db:seed` — the one command to run after cloning |
+| `pnpm db:up` | Starts MongoDB and waits until it is healthy |
+| `pnpm db:down` | Stops it, keeping the data |
+| `pnpm db:seed` | Creates the development admin. Safe to re-run |
+| `pnpm db:reset` | Discards all local data. Follow with `pnpm db:setup` |
+
+Data lives in a Docker-managed volume, not in the working tree, so nothing database-shaped can
+be committed by accident.
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.

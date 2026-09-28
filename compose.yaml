@@ -1,0 +1,41 @@
+# Local development database.
+#
+# Run through the package scripts (`pnpm db:setup`), never `docker compose up` directly:
+# every invocation needs `--env-file .env.local`, and without it Compose interpolates the
+# values below to empty strings and the container initialises with no credentials at all.
+#
+# The same file the application reads is what initialises this container, so the two cannot
+# drift apart. That is also why no credential is written literally here.
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: checklist-mongo
+    # Respects a deliberate `db:down`; only restarts after a host or daemon restart.
+    restart: unless-stopped
+    environment:
+      # Created in the `admin` database, which is where the application authenticates
+      # against — see specs/004-local-mongo-compose/data-model.md for why that works.
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+    ports:
+      - '${DB_PORT}:27017'
+    volumes:
+      # A named volume, NOT a bind mount. The image's entrypoint chowns /data/db, which
+      # macOS file sharing refuses on a host directory — the container then crash-loops with
+      # "chown: changing ownership of '/data/db': Permission denied". Verified on this
+      # machine. A named volume is managed by the daemon and has no such restriction.
+      - mongo_data:/data/db
+    healthcheck:
+      # `ping` is permitted before authentication, so this needs no credentials.
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+volumes:
+  # Managed by Docker rather than living in the working tree, so nothing database-shaped can
+  # ever be staged by accident. Removed by `pnpm db:reset`.
+  mongo_data:

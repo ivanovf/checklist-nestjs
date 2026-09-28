@@ -20,6 +20,13 @@ import { MongooseModule } from '@nestjs/mongoose';
         const rawArgs = config.get<string>('DB_ARGS');
         const args = rawArgs ? `?${rawArgs}` : '';
 
+        // The database name is passed as `dbName` below and deliberately kept OUT of the
+        // URI path. With no database in the path the driver defaults its authentication
+        // source to `admin`, which is where both Atlas users and the local container's root
+        // user are created. Moving the name into the path changes the authentication source
+        // to that database, where the user does not exist, and every connection fails with
+        // `Authentication failed` — a message that points at credentials rather than at this
+        // line. Verified against a live server; see specs/004-local-mongo-compose R4.
         return {
           uri: `${dbDrive}://${dbHost}${dbPort}/${args}`,
           user: dbUser,
