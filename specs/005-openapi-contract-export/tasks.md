@@ -179,7 +179,7 @@ d. Where the controller spec is definedness-only, replace it with tests assertin
 - [X] T034 [P] Add a short "API contract" section to `README.md`: where `openapi.json` is, how to regenerate it, and that it is read offline
 - [X] T035 Run all gates and record the results: `pnpm lint:ci && pnpm test && pnpm test:e2e && pnpm build && pnpm docs:check && pnpm audit --audit-level high`. The coverage floors hold (80% overall, 90% `src/auth`)
 - [X] T036 Run quickstart §1–§3 end to end and tick the results in `specs/005-openapi-contract-export/quickstart.md`
-- [ ] T037 Write the PR description. It states:
+- [X] T037 Write the PR description. It states:
   - the principles touched (I, II, III, IV);
   - flags both deviations from plan.md "Complexity Tracking" for reviewer acknowledgement;
   - requests the `src/auth/**` security review;
