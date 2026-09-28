@@ -70,7 +70,7 @@ The file must not hold registry tokens or any other secret (Constitution III).
 
 | Field | Before | After | Serves |
 |---|---|---|---|
-| `installCommand` | `npm install --include=dev` | `corepack enable pnpm && pnpm install --frozen-lockfile --prod=false` | FR-007 |
+| `installCommand` | `npm install --include=dev` | `corepack enable pnpm && pnpm install --frozen-lockfile --config.production=false` | FR-007 |
 | `buildCommand` | `nest build` | unchanged | FR-007 |
 | `outputDirectory` | `public` | unchanged (never `.`) | FR-007 |
 | `functions["api/index.js"]` | `includeFiles: dist/**`, 1024 MB, 30 s | unchanged | FR-007, FR-008 |

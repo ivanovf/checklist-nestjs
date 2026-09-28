@@ -3,7 +3,7 @@
   "framework": null,
   "buildCommand": "nest build",
   "outputDirectory": "public",
-  "installCommand": "corepack enable pnpm && pnpm install --frozen-lockfile --prod=false",
+  "installCommand": "corepack enable pnpm && pnpm install --frozen-lockfile --config.production=false",
   "functions": {
     "api/index.js": {
       "includeFiles": "dist/**",
