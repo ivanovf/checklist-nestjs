@@ -158,10 +158,17 @@ the contract, this entry, and the test together.
 - **Apparent intent**: optional paging with defaults 10 and 0
 - **Contract**: documents `limit` and `offset` as optional, with a description saying that
   supplying either is currently refused
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D11: …"
-- **Principle**: V (lists paginated with a bounded default): the default still applies,
-  but callers cannot page
+- **Evidence**: `test/reservations/reservation-paging.e2e-spec.ts` (regression suite; the
+  D11 case was removed from `contract-discrepancies.e2e-spec.ts`)
+- **Principle**: V (lists paginated with a bounded default). Correction, observed 2026-09-29:
+  the default did **not** apply. Without paging values the route returned every
+  reservation, because the handler received the raw query rather than the defaulted DTO.
+- **Also found**: the same root cause made the default order ascending although the contract
+  said `desc`, and made `old=false` filter like `old=true`. Both are fixed by the same change.
 - **Issue**: #16
+- **Status**: Resolved by `specs/006-fix-reservation-paging` (2026-09-29): paging is
+  optional (1–50, default 10, offset default 0), larger pages are refused, the order is
+  newest first with a stable tie-break, and flags accept only `true` or `false`.
 
 ## D12 — An invalid role is a server error
 
