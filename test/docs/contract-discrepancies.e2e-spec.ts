@@ -13,8 +13,9 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  * must update the contract, the register entry and this test together, so the contract
  * never silently goes stale.
  *
- * Not here: D4 is fixed (pinned by pagination-query.e2e-spec.ts), and D14 is dead code with
- * no behaviour to run.
+ * Not here: D4 is fixed (pinned by pagination-query.e2e-spec.ts), D11 is fixed by
+ * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
+ * and D14 is dead code with no behaviour to run.
  */
 describe('Recorded contract discrepancies', () => {
   let app: INestApplication;
@@ -137,11 +138,6 @@ describe('Recorded contract discrepancies', () => {
       .set(auth())
       .send({ analogLecture: 1, apiKey: 'wrong-key', time: 1 })
       .expect(404);
-  });
-
-  it('D11: the reservation list refuses any paging value', async () => {
-    await http().get('/api/reservations/all?offset=0').set(auth()).expect(400);
-    await http().get('/api/reservations/all').set(auth()).expect(200);
   });
 
   it('D12: an unknown role is a server error', async () => {

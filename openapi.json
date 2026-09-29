@@ -761,6 +761,7 @@
             "name": "old",
             "required": false,
             "in": "query",
+            "description": "Only past stays. Accepts `true` or `false`; anything else is refused.",
             "schema": {
               "type": "boolean"
             }
@@ -769,6 +770,7 @@
             "name": "validated",
             "required": false,
             "in": "query",
+            "description": "Accepts `true` or `false`; anything else is refused.",
             "schema": {
               "type": "boolean"
             }
@@ -795,23 +797,24 @@
             "name": "limit",
             "required": false,
             "in": "query",
-            "description": "Defaults to 10. Currently refused with 400 whenever supplied (discrepancy D11); omit it.",
             "schema": {
+              "type": "integer",
               "minimum": 1,
-              "default": 10,
-              "type": "number"
-            }
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400."
           },
           {
             "name": "offset",
             "required": false,
             "in": "query",
-            "description": "Defaults to 0. Currently refused with 400 whenever supplied (discrepancy D11); omit it.",
             "schema": {
+              "type": "integer",
               "minimum": 0,
-              "default": 0,
-              "type": "number"
-            }
+              "default": 0
+            },
+            "description": "Reservations to skip. Defaults to 0."
           }
         ],
         "responses": {

@@ -6,8 +6,20 @@ import {
   IsString,
 } from 'class-validator';
 import { FilterListDto } from './filter-list.dto';
-import { Transform } from 'class-transformer';
+import { Transform, TransformFnParams } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+
+/**
+ * Reads a query flag from its raw string. The global pipe converts implicitly, which turns a
+ * Boolean-typed property into a boolean *before* `@Transform` runs, so reading `value` would
+ * see `Boolean('false') === true`. The source object still holds what the caller sent. Any
+ * value other than 'true' or 'false' is passed through so `@IsBoolean` refuses it.
+ */
+const toFlag = ({ obj, key }: TransformFnParams): unknown => {
+  const raw: unknown = obj[key];
+
+  return raw === 'true' ? true : raw === 'false' ? false : raw;
+};
 
 export class FilterReservationsDto extends FilterListDto {
   @ApiPropertyOptional({ enum: ['airbnb', 'booking', 'direct'] })
@@ -22,16 +34,21 @@ export class FilterReservationsDto extends FilterListDto {
   @IsIn(['asc', 'desc'])
   sort = 'desc';
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description:
+      'Only past stays. Accepts `true` or `false`; anything else is refused.',
+  })
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }) => value === 'true')
+  @Transform(toFlag)
   old: boolean;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Accepts `true` or `false`; anything else is refused.',
+  })
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }) => value === 'true')
+  @Transform(toFlag)
   validated: boolean;
 
   @ApiPropertyOptional({ format: 'date-time' })

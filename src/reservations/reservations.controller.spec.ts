@@ -1,9 +1,12 @@
+import { PipeTransform, ValidationPipe } from '@nestjs/common';
+import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { Role } from '../auth/models/role.model';
 import { routeOf } from '../common/testing/route-metadata';
 import { ReservationsController } from './reservations.controller';
 import { ReservationsService } from './reservations.service';
+import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
 
 /**
  * Routing, access declarations and input binding for every route (constitution Principle
@@ -74,6 +77,46 @@ describe('ReservationsController', () => {
     it('remove forwards its input and returns the service result', () => {
       expect(controller.remove(id)).toBe(result);
       expect(service.remove).toHaveBeenCalledWith(id);
+    });
+  });
+
+  /**
+   * The global pipe validates the query but hands the handler the raw strings, so this route
+   * converts its own query (specs/006-fix-reservation-paging, research R2).
+   */
+  describe('findAll query conversion', () => {
+    const queryPipe = (): PipeTransform => {
+      const args: Record<string, { pipes: PipeTransform[] }> =
+        Reflect.getMetadata(
+          ROUTE_ARGS_METADATA,
+          ReservationsController,
+          'findAll',
+        );
+      const [query] = Object.values(args);
+
+      return query.pipes.find(
+        (pipe) => pipe instanceof ValidationPipe,
+      ) as PipeTransform;
+    };
+    const run = (value: object) =>
+      queryPipe().transform(value, {
+        type: 'query',
+        metatype: FilterReservationsDto,
+      });
+
+    it('binds a ValidationPipe to the query', () => {
+      expect(queryPipe()).toBeInstanceOf(ValidationPipe);
+    });
+
+    it('hands the handler a converted query with its defaults', async () => {
+      const dto = await run({ sort: 'asc' });
+
+      expect(dto).toBeInstanceOf(FilterReservationsDto);
+      expect(dto).toMatchObject({ sort: 'asc', limit: 10, offset: 0 });
+    });
+
+    it('drops keys the query does not declare', async () => {
+      expect(await run({ foo: 'x' })).not.toHaveProperty('foo');
     });
   });
 });

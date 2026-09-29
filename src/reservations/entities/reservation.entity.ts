@@ -35,3 +35,11 @@ export class Reservation extends Document {
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);
+
+// Every field the reservation list sorts or filters on is indexed (constitution Principle V;
+// specs/006-fix-reservation-paging, research R6). The compound index serves the sort in both
+// directions, with `_id` as its tie-break, and the `dateFrom` bound.
+ReservationSchema.index({ dateIni: -1, _id: -1 });
+ReservationSchema.index({ type: 1 });
+ReservationSchema.index({ validated: 1 });
+ReservationSchema.index({ dateEnd: 1 });

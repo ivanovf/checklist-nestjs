@@ -7,6 +7,7 @@ import {
   Delete,
   Put,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -23,8 +24,24 @@ import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
 import { ReservationResponseDto } from './dto/reservation-response.dto';
 import { DeletedResponseDto } from '../common/dto/deleted-response.dto';
 import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
+import { MAX_PAGE_SIZE } from '../filter_dto/filter-list.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/models/role.model';
+
+/**
+ * Converts the reservation list's query for the handler. The global pipe only validates: it
+ * converts a copy to check it, then passes the raw strings on, so the DTO's defaults never
+ * applied and the list was unbounded (specs/006-fix-reservation-paging, research R1).
+ *
+ * Scoped to this route because a global `transform` would change the input of every handler
+ * in the API (R2). `whitelist` only strips undeclared keys, which the service never reads, so
+ * callers see no difference. Refusing them (`forbidNonWhitelisted`) is discrepancy D5.
+ */
+const listQueryPipe = new ValidationPipe({
+  transform: true,
+  whitelist: true,
+  transformOptions: { enableImplicitConversion: true },
+});
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
@@ -57,18 +74,21 @@ export class ReservationsController {
   @ApiQuery({
     name: 'limit',
     required: false,
-    type: Number,
-    description:
-      'Defaults to 10. Currently refused with 400 whenever supplied (discrepancy D11); omit it.',
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      maximum: MAX_PAGE_SIZE,
+      default: 10,
+    },
+    description: `Page size, 1–${MAX_PAGE_SIZE}. Defaults to 10. A larger value is refused with 400.`,
   })
   @ApiQuery({
     name: 'offset',
     required: false,
-    type: Number,
-    description:
-      'Defaults to 0. Currently refused with 400 whenever supplied (discrepancy D11); omit it.',
+    schema: { type: 'integer', minimum: 0, default: 0 },
+    description: 'Reservations to skip. Defaults to 0.',
   })
-  findAll(@Query() params: FilterReservationsDto) {
+  findAll(@Query(listQueryPipe) params: FilterReservationsDto) {
     return this.reservationsService.findAll(params);
   }
 
