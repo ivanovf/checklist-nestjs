@@ -15,6 +15,7 @@ export const DEV_ADMIN = {
   email: 'dev.admin@localhost.test',
   name: 'Local Development Admin',
   password: 'localdevadmin',
+  role: Role.ADMIN,
 } as const;
 
 export type SeedOutcome = 'created' | 'already-exists' | 'exists-without-admin';
