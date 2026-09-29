@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppController } from './app.controller';
+import { routeOf } from './common/testing/route-metadata';
 import { AppService } from './app.service';
 
 describe('AppController', () => {
@@ -27,6 +28,18 @@ describe('AppController', () => {
         api: 'Checklist',
         version: '1.0',
       });
+    });
+  });
+});
+
+// Routing and access declarations (constitution Principle I).
+describe('AppController routes', () => {
+  it('serves the identity banner at a public GET /', () => {
+    expect(routeOf(AppController, 'getHome')).toEqual({
+      method: 'GET',
+      path: '/',
+      roles: undefined,
+      isPublic: true,
     });
   });
 });

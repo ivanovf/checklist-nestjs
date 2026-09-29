@@ -44,15 +44,16 @@ jobs:
 
       # Constitution gate 2 — unit tests and coverage thresholds
       - name: Unit tests
-        run: pnpm test -- --coverage
+        run: pnpm test --coverage
 
       # Constitution gate 3 — end-to-end tests
       - name: End-to-end tests
         run: pnpm test:e2e
 
-      # Constitution gate 4
+      # Constitution gate 4. docs:check reuses this build: it fails when the committed
+      # openapi.json no longer matches what the compiled code generates.
       - name: Build
-        run: pnpm build
+        run: pnpm build && pnpm docs:check
 
       # Constitution gate 5 — no high or critical advisories
       - name: Dependency audit

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDate,
   IsEnum,
@@ -30,7 +30,7 @@ export class CreateActivityDto {
   readonly date: Date;
 
   @IsString()
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   readonly description: string;
 }

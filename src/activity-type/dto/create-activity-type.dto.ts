@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateActivityTypeDto {
@@ -12,7 +12,7 @@ export class CreateActivityTypeDto {
   readonly budget: number;
 
   @IsString()
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   readonly description: string;
 }

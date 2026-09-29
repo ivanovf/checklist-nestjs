@@ -1,9 +1,10 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 
 import { parseCorsOrigins } from './config/env.validation';
+import { buildOpenApiDocument } from './openapi/openapi-document';
 
 /**
  * Shared application wiring.
@@ -40,12 +41,7 @@ export function configureApp(app: INestApplication): void {
 
   app.setGlobalPrefix('api');
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Checklist API')
-    .setDescription('Documentación Checklist API')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = buildOpenApiDocument(app);
 
   if (!isDeployed) {
     // The document is always generated — every endpoint keeps its metadata, so the API

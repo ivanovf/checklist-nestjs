@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -43,7 +43,9 @@ export class CreateReservationDto {
 
   @IsOptional()
   @IsDigitalNumber(10)
-  @ApiProperty()
+  @ApiPropertyOptional({
+    description: 'Accepted but currently not stored (discrepancy D15).',
+  })
   readonly lockUser: string;
 
   @IsNumber()
@@ -54,7 +56,7 @@ export class CreateReservationDto {
   readonly quantity: number;
 
   @IsOptional()
-  @ApiProperty()
+  @ApiPropertyOptional()
   readonly cost: number;
 
   @IsArray()

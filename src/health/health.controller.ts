@@ -1,6 +1,7 @@
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import {
   ApiOkResponse,
+  ApiOperation,
   ApiServiceUnavailableResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -20,6 +21,7 @@ export class HealthController {
    */
   @Public()
   @Get()
+  @ApiOperation({ summary: 'Report service and data store availability' })
   @ApiOkResponse({
     description: 'The service and its data store are available.',
     schema: {
