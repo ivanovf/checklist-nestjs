@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+#
+# Refuses a push unless `pnpm verify` passed the quality gates for exactly that commit
+# (scripts/verify-gates.sh explains why the gates run there rather than here), and refuses
+# any push to main.
+#
+# Bypass in an emergency with `git push --no-verify`, and say so in the PR.
+
+set -eu
+
+verified_file="$(git rev-parse --git-dir)/verified-sha"
+verified=$(cat "$verified_file" 2>/dev/null || true)
+zero=0000000000000000000000000000000000000000
+
+while read -r local_ref local_sha remote_ref _remote_sha; do
+  # Deleting a remote branch pushes no code.
+  [ "$local_sha" = "$zero" ] && continue
+
+  # Changes reach main only by merged pull request (CLAUDE.md).
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "pre-push: refusing to push to main. Open a pull request instead." >&2
+    exit 1
+  fi
+
+  if [ "$local_sha" != "$verified" ]; then
+    echo "pre-push: $local_ref ($local_sha) has not passed the gates. Run \`pnpm verify\`, then push again." >&2
+    exit 1
+  fi
+done
+
+exit 0

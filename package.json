@@ -13,6 +13,8 @@
     "yarn": "please-use-pnpm"
   },
   "scripts": {
+    "prepare": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
+    "verify": "sh scripts/verify-gates.sh",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "./node_modules/.bin/nest start",

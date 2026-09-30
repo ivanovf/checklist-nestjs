@@ -22,13 +22,14 @@ pnpm lint:ci && pnpm test && pnpm test:e2e && pnpm build && pnpm docs:check && p
 ```
 - The e2e suite uses `mongodb-memory-server` and must stay `--runInBand` (one shared mongod).
 - `pnpm db:reset` wipes the local volume.
+- `pnpm verify` runs the gates on the committed HEAD: lint, unit tests with coverage, build, `docs:check` and audit (about 9 minutes on `/mnt/c`). It needs a clean tree. e2e runs only with `VERIFY_E2E=1 pnpm verify`. The `pre-push` hook in `.githooks/` refuses to push any commit that `pnpm verify` hasn't passed, and any push to `main`. `pnpm install` switches the hook on (`prepare` sets `core.hooksPath`). `git push --no-verify` bypasses it, and the PR must then say so.
 - `pnpm docs:export` rebuilds and writes `openapi.json`, the committed API contract. It needs no database. `pnpm docs:check` compares the current build with it; CI runs it in the Build step.
 
 ## Conventions
 - Spec Kit flow per feature: `/speckit-specify → clarify → plan → tasks → analyze → implement`, with artifacts in `specs/NNN-name/`.
 - Branch per feature and merge by PR. **Never commit to `main`.** Check the branch before every commit.
 - Commits: imperative summary line, no `feat:`/`fix:` prefix, and a body that explains why.
-- Test-first. Coverage floors are 80% overall and 90% for `src/auth`. The five gates are lint, test, e2e, build, and audit, all enforced in CI.
+- Test-first. Coverage floors are 80% overall and 90% for `src/auth`. The five gates are lint, test, e2e, build, and audit. GitHub Actions is billing-locked and paid CI is not wanted for this personal app, so `pnpm verify` and the local `pre-push` hook enforce them. State the e2e result in every PR.
 - Layering: controllers are HTTP-only, services own rules and are the only layer that touches models, and responses are projected through DTOs. No `any`.
 - Every endpoint needs `@ApiTags`, `@ApiOperation`, a success response with its body type (documentation-only `*-response.dto.ts` classes), and `@ApiRefusals(...)` from `src/common/decorators/`. Document only statuses the route really returns. `test/docs/` enforces this: completeness, agreement with the authorization matrix, a sample called for real, and one test per recorded discrepancy.
 - A change to any route's inputs, outputs or access must regenerate and commit `openapi.json` in the same PR. Where behaviour and apparent intent disagree, the contract states the behaviour and `specs/005-openapi-contract-export/discrepancies.md` records the gap.
