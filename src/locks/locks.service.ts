@@ -27,7 +27,9 @@ export class LocksService {
   }
 
   findAll(limit: number, offset: number) {
-    return this.lockModel.find().limit(limit).skip(offset);
+    // `_id` gives a fixed order, so consecutive pages never repeat or skip a record. It is
+    // always indexed (constitution Principle V; specs/007-fix-list-paging-defaults, R5).
+    return this.lockModel.find().sort({ _id: 1 }).limit(limit).skip(offset);
   }
 
   findOne(id: string) {

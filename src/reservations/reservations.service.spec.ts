@@ -11,7 +11,7 @@ import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
  * filter, page and order were asked for.
  *
  * `findAll` has no failure path of its own: invalid queries are refused by the DTO before it
- * runs (filter-list.dto.spec.ts, filter-reservation.dto.spec.ts).
+ * runs (pagination-query.dto.spec.ts, filter-reservation.dto.spec.ts).
  */
 describe('ReservationsService', () => {
   let service: ReservationsService;

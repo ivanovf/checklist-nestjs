@@ -91,4 +91,39 @@ describe('UsersService', () => {
       ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
+
+  describe('findAll', () => {
+    const chain = () => {
+      const query: Record<'limit' | 'skip' | 'sort' | 'exec', jest.Mock> = {
+        limit: jest.fn(),
+        skip: jest.fn(),
+        sort: jest.fn(),
+        exec: jest.fn().mockResolvedValue([doc()]),
+      };
+      query.limit.mockReturnValue(query);
+      query.skip.mockReturnValue(query);
+      query.sort.mockReturnValue(query);
+      model.find.mockReturnValue(query);
+
+      return query;
+    };
+
+    it('reads one page, ordered by id so pages never overlap', async () => {
+      const query = chain();
+
+      await service.findAll(5, 10);
+
+      expect(query.limit).toHaveBeenCalledWith(5);
+      expect(query.skip).toHaveBeenCalledWith(10);
+      expect(query.sort).toHaveBeenCalledWith({ _id: 1 });
+    });
+
+    it('does not return password hashes', async () => {
+      chain();
+
+      const result = await service.findAll(5, 0);
+
+      expect(JSON.stringify(result)).not.toContain(hash);
+    });
+  });
 });

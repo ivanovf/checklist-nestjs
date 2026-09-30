@@ -54,8 +54,11 @@ export class ItemsController {
   })
   @ApiRefusals(400, 401)
   findAll(
-    // Typed binding (discrepancy D4). Both values stay required, as they were (D1).
-    @Query(new ValidationPipe({ transform: true })) query: PaginationQueryDto,
+    // Paging is optional and bounded by PaginationQueryDto (D1 fixed by
+    // specs/007-fix-list-paging-defaults). `whitelist` strips undeclared keys, as on the
+    // reservation list; the service never reads them.
+    @Query(new ValidationPipe({ transform: true, whitelist: true }))
+    query: PaginationQueryDto,
   ) {
     return this.itemsService.findAll(query.limit, query.offset);
   }
