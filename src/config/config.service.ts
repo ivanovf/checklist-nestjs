@@ -24,28 +24,30 @@ export class ConfigService {
     return conf;
   }
 
-  update(id: string, updateConfigDto: UpdateConfigDto) {
-    const appConf = this.configModel
+  async update(id: string, updateConfigDto: UpdateConfigDto) {
+    // Awaited before the check: an unawaited query is always truthy, so the not-found branch
+    // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
+    const appConf = await this.configModel
       .findByIdAndUpdate(id, { $set: updateConfigDto }, { new: true })
       .exec();
 
     if (!appConf) {
-      throw new NotFoundException(id);
+      throw new NotFoundException(`config #${id} not found`);
     }
     return appConf;
   }
 
-  updateAnalogLecure(id: string, tankLevelConfigDto: TankLevelConfigDto) {
+  async updateAnalogLecure(id: string, tankLevelConfigDto: TankLevelConfigDto) {
     if (tankLevelConfigDto.apiKey !== process.env.TANK_API_KEY) {
       throw new NotFoundException('Invalid API Key');
     }
 
-    const appConf = this.configModel
+    const appConf = await this.configModel
       .findByIdAndUpdate(id, { $set: tankLevelConfigDto }, { new: true })
       .exec();
 
     if (!appConf) {
-      throw new NotFoundException(id);
+      throw new NotFoundException(`config #${id} not found`);
     }
     return appConf;
   }

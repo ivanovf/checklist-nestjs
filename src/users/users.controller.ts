@@ -23,6 +23,7 @@ import {
 import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
 import { UserResponseDto } from './dto/user-response.dto';
 import { DeletedResponseDto } from '../common/dto/deleted-response.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/models/role.model';
 
@@ -69,8 +70,8 @@ export class UsersController {
     type: UserResponseDto,
     description: 'The account.',
   })
-  @ApiRefusals(401, 404)
-  findOne(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 404)
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.usersService.findOne(id);
   }
 
@@ -84,7 +85,10 @@ export class UsersController {
     description: 'The updated account.',
   })
   @ApiRefusals(400, 401, 404)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     //@todo Validate update only own user.
     return this.usersService.update(id, updateUserDto);
   }
@@ -96,8 +100,8 @@ export class UsersController {
     type: DeletedResponseDto,
     description: 'The account was deleted.',
   })
-  @ApiRefusals(401, 403, 404)
-  remove(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 403, 404)
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
     return this.usersService.remove(id);
   }
 }

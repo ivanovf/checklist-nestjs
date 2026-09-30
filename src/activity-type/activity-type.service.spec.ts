@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 
@@ -6,17 +7,24 @@ import { ActivityType } from './entities/activity-type.entity';
 
 /**
  * The service takes its Mongoose model through @InjectModel, so the model token has to be
- * provided here. Without it the testing module cannot construct the service at all.
+ * provided here. Each by-id query resolves through `exec()`, so every test mocks that.
  */
 describe('ActivityTypeService', () => {
   let service: ActivityTypeService;
   let model: Record<string, jest.Mock>;
 
   const objectId = '507f1f77bcf86cd799439011';
+  const record = { _id: objectId };
+  const resolves = (value: unknown) => ({
+    exec: jest.fn().mockResolvedValue(value),
+  });
+  const notFound = new NotFoundException(
+    `activity type #${objectId} not found`,
+  );
 
   beforeEach(async () => {
     model = {
-      findByIdAndDelete: jest.fn(),
+      findByIdAndDelete: jest.fn().mockReturnValue(resolves(record)),
       findByIdAndUpdate: jest.fn(),
       findById: jest.fn(),
       find: jest.fn(),
@@ -32,8 +40,44 @@ describe('ActivityTypeService', () => {
     service = module.get<ActivityTypeService>(ActivityTypeService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  /**
+   * These used to have no existence check at all, so an unknown id was answered as an empty
+   * success (D2, specs/008-fix-unknown-id-404).
+   */
+  describe('by id', () => {
+    it('findOne answers the record', async () => {
+      model.findById.mockReturnValue(resolves(record));
+
+      await expect(service.findOne(objectId)).resolves.toBe(record);
+    });
+
+    it('findOne refuses an unknown id', async () => {
+      model.findById.mockReturnValue(resolves(null));
+
+      await expect(service.findOne(objectId)).rejects.toThrow(notFound);
+    });
+
+    it('update answers the changed record', async () => {
+      model.findByIdAndUpdate.mockReturnValue(resolves(record));
+
+      await expect(service.update(objectId, {})).resolves.toBe(record);
+    });
+
+    it('update refuses an unknown id', async () => {
+      model.findByIdAndUpdate.mockReturnValue(resolves(null));
+
+      await expect(service.update(objectId, {})).rejects.toThrow(notFound);
+    });
+
+    it('remove answers the deleted record', async () => {
+      await expect(service.remove(objectId)).resolves.toBe(record);
+    });
+
+    it('remove refuses an unknown id', async () => {
+      model.findByIdAndDelete.mockReturnValue(resolves(null));
+
+      await expect(service.remove(objectId)).rejects.toThrow(notFound);
+    });
   });
 
   describe('remove', () => {

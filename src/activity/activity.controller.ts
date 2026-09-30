@@ -19,6 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import {
   ActivityDeletedResponseDto,
   ActivityRecordResponseDto,
@@ -66,8 +67,8 @@ export class ActivityController {
     type: ActivityResponseDto,
     description: 'The activity, with its type populated.',
   })
-  @ApiRefusals(401, 404)
-  findOne(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 404)
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.activityService.findOne(id);
   }
 
@@ -76,12 +77,11 @@ export class ActivityController {
   @ApiOperation({ summary: 'Update an activity' })
   @ApiOkResponse({
     type: ActivityRecordResponseDto,
-    description:
-      'The updated activity with its type as an id, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The updated activity with its type as an id.',
   })
-  @ApiRefusals(400, 401)
+  @ApiRefusals(400, 401, 404)
   update(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateActivityDto: UpdateActivityDto,
   ) {
     return this.activityService.update(id, updateActivityDto);
@@ -94,8 +94,8 @@ export class ActivityController {
     type: ActivityDeletedResponseDto,
     description: 'The activity was deleted.',
   })
-  @ApiRefusals(401, 403, 404)
-  async remove(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 403, 404)
+  async remove(@Param('id', ParseObjectIdPipe) id: string) {
     // Awaited. The previous form tested the Promise itself, which is always truthy, so a
     // failed delete still reported success and the rejection escaped unhandled.
     await this.activityService.remove(id);

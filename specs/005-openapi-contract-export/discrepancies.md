@@ -53,9 +53,17 @@ the contract, this entry, and the test together.
     return **404**
 - **Apparent intent**: 404 Not Found, which several services write as `if (!doc) throw`
   against an unawaited query, a check that can never fire
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › both "D2: …" tests (unknown item: GET 200 empty, DELETE 200 `{deleted: true}`)
+- **Evidence**: `test/records/record-ids.e2e-spec.ts` (all 20 by-id operations; the D2 cases
+  were removed from `contract-discrepancies.e2e-spec.ts`)
 - **Principle**: IV (errors as Nest HTTP exceptions with a consistent shape)
+- **Also found** (observed 2026-09-30): with a malformed id, the item, lock and reservation
+  DELETEs also answered `{ deleted: true }`, because their unawaited query's rejection went
+  unhandled. `activity-type` (all three) and `PUT /api/activity/:id` had no existence check at
+  all.
 - **Issue**: #8
+- **Status**: Resolved by `specs/008-fix-unknown-id-404` (2026-09-30). Every by-id operation
+  awaits its query and answers **404** `<kind> #<id> not found` for an unknown id, and a delete
+  reports only a real deletion.
 
 ## D3 — Stored records are returned unprojected
 
@@ -107,17 +115,21 @@ the contract, this entry, and the test together.
 
 ## D7 — A malformed id is a server error
 
-- **Operation(s)**: `GET` on every `/:id` route (items, locks, users, reservations,
-  activity-type, activity)
+- **Operation(s)**: every by-id operation, all 20 (corrected 2026-09-30: not only `GET`). 17
+  answered **500**, and the item, lock and reservation DELETEs answered `{ deleted: true }`
 - **Observed** (2026-09-28): `GET /api/<module>/not-an-id` returns **500**
   `Internal server error`. The Mongoose cast error is not mapped to a client error
 - **Apparent intent**: 400 (invalid identifier) or 404
 - **Contract**: 500 is not documented. It is a defect, not a response the API offers
   (check 4)
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D7: …"
+- **Evidence**: `test/records/record-ids.e2e-spec.ts` (the D7 case was removed from
+  `contract-discrepancies.e2e-spec.ts`)
 - **Principle**: IV ("Raw driver, Mongoose … details MUST NOT reach clients"; errors as
   consistent HTTP exceptions)
 - **Issue**: #12
+- **Status**: Resolved by `specs/008-fix-unknown-id-404` (2026-09-30). `ParseObjectIdPipe` on
+  every `:id` answers **400** `Invalid id "<value>"`, after the guards, so 401 and 403 still come
+  first.
 
 ## D8 — Some invalid update bodies are server errors
 
@@ -224,3 +236,16 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D15: …"
 - **Principle**: —
 - **Issue**: #20
+
+## D16 — An account password change can be refused with an undocumented 406
+
+- **Operation(s)**: `PUT /api/users/:id`
+- **Observed** (read in `UsersService.update`, 2026-09-30, during feature 008): a wrong
+  current password (`The password does not match.`) or a missing new one
+  (`No new password provide`) is refused with **406 Not Acceptable**
+- **Apparent intent**: a client error the contract describes, most likely 400 or 403
+- **Contract**: does not document 406, and `test/docs` check 4 would not allow it, so the
+  contract is silent about these refusals
+- **Evidence**: none yet. Recorded only; the behaviour is unchanged by 008
+- **Principle**: IV (documented response statuses, including error cases)
+- **Issue**: none yet. Open one only with the owner's approval

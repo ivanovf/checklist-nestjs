@@ -1,6 +1,6 @@
 /**
- * What most delete routes answer: `{ "deleted": true }` (observed 2026-09-28). Also what
- * they answer for an id that matches no record (discrepancy D2).
+ * What most delete routes answer: `{ "deleted": true }`, only when a record was actually
+ * deleted. An unknown id is refused with 404 (D2, fixed by specs/008-fix-unknown-id-404).
  *
  * Documentation only: nothing constructs this class.
  */

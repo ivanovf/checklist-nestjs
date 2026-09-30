@@ -30,22 +30,25 @@ export class ReservationsService {
     return reservation.save();
   }
 
-  update(id: string, updateReservationDto: UpdateReservationDto) {
-    const updated = this.reservationModel
+  async update(id: string, updateReservationDto: UpdateReservationDto) {
+    // Awaited before the check: an unawaited query is always truthy, so the not-found branch
+    // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
+    const updated = await this.reservationModel
       .findByIdAndUpdate(id, { $set: updateReservationDto }, { new: true })
       .exec();
 
     if (!updated) {
-      throw new NotFoundException(id);
+      throw new NotFoundException(`reservation #${id} not found`);
     }
     return updated;
   }
 
-  remove(id: string) {
-    const removed = this.reservationModel.findByIdAndDelete(id).exec();
+  async remove(id: string) {
+    // Reports a deletion only when a record was actually deleted.
+    const removed = await this.reservationModel.findByIdAndDelete(id).exec();
 
     if (!removed) {
-      throw new NotFoundException(id);
+      throw new NotFoundException(`reservation #${id} not found`);
     }
     return { deleted: true };
   }
@@ -74,13 +77,13 @@ export class ReservationsService {
       .sort({ dateIni: dir, _id: dir });
   }
 
-  findOne(id: string) {
-    const reservation = this.reservationModel.findById(id);
+  async findOne(id: string) {
+    const found = await this.reservationModel.findById(id).exec();
 
-    if (!reservation) {
+    if (!found) {
       throw new NotFoundException(`reservation #${id} not found`);
     }
-    return reservation;
+    return found;
   }
 
   async checkAvailability(dateIni: Date, dateEnd: Date) {

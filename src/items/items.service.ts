@@ -15,15 +15,17 @@ export class ItemsService {
     return newItem.save();
   }
 
-  update(id: string, updateItemDto: UpdateItemDto) {
-    const itemUpdate = this.itemModel
+  async update(id: string, updateItemDto: UpdateItemDto) {
+    // Awaited before the check: an unawaited query is always truthy, so the not-found branch
+    // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
+    const updated = await this.itemModel
       .findByIdAndUpdate(id, { $set: updateItemDto }, { new: true })
       .exec();
 
-    if (!itemUpdate) {
-      throw new NotFoundException(id);
+    if (!updated) {
+      throw new NotFoundException(`item #${id} not found`);
     }
-    return itemUpdate;
+    return updated;
   }
 
   findAll(limit: number, offset: number) {
@@ -32,20 +34,21 @@ export class ItemsService {
     return this.itemModel.find().sort({ _id: 1 }).limit(limit).skip(offset);
   }
 
-  findOne(id: string) {
-    const item = this.itemModel.findById(id);
+  async findOne(id: string) {
+    const found = await this.itemModel.findById(id).exec();
 
-    if (!item) {
-      throw new NotFoundException(`Item #${id} not found`);
+    if (!found) {
+      throw new NotFoundException(`item #${id} not found`);
     }
-    return item;
+    return found;
   }
 
-  remove(id: string) {
-    const item = this.itemModel.findByIdAndDelete(id).exec();
+  async remove(id: string) {
+    // Reports a deletion only when a record was actually deleted.
+    const removed = await this.itemModel.findByIdAndDelete(id).exec();
 
-    if (!item) {
-      throw new NotFoundException(id);
+    if (!removed) {
+      throw new NotFoundException(`item #${id} not found`);
     }
     return { deleted: true };
   }

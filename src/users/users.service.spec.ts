@@ -92,6 +92,26 @@ describe('UsersService', () => {
     });
   });
 
+  describe('update with a password change', () => {
+    it('refuses an unknown account with 404 (specs/008-fix-unknown-id-404)', async () => {
+      model.findById.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue(null),
+        }),
+      });
+
+      await expect(
+        service.update('6aba80d38c58c96b58020000', {
+          changePassword: true,
+          password: 'new',
+          currentPassword: 'old',
+        } as never),
+      ).rejects.toThrow(
+        new NotFoundException('user #6aba80d38c58c96b58020000 not found'),
+      );
+    });
+  });
+
   describe('findAll', () => {
     const chain = () => {
       const query: Record<'limit' | 'skip' | 'sort' | 'exec', jest.Mock> = {

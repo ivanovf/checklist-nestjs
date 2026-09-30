@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { ActivityTypeResponseDto } from './dto/activity-type-response.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/models/role.model';
@@ -55,11 +56,10 @@ export class ActivityTypeController {
   @ApiOperation({ summary: 'Get an activity type' })
   @ApiOkResponse({
     type: ActivityTypeResponseDto,
-    description:
-      'The activity type, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The activity type.',
   })
-  @ApiRefusals(401, 403)
-  findOne(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 403, 404)
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.activityTypeService.findOne(id);
   }
 
@@ -67,12 +67,11 @@ export class ActivityTypeController {
   @ApiOperation({ summary: 'Update an activity type' })
   @ApiOkResponse({
     type: ActivityTypeResponseDto,
-    description:
-      'The updated activity type, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The updated activity type.',
   })
-  @ApiRefusals(400, 401, 403)
+  @ApiRefusals(400, 401, 403, 404)
   update(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateActivityTypeDto: UpdateActivityTypeDto,
   ) {
     return this.activityTypeService.update(id, updateActivityTypeDto);
@@ -82,11 +81,10 @@ export class ActivityTypeController {
   @ApiOperation({ summary: 'Delete an activity type' })
   @ApiOkResponse({
     type: ActivityTypeResponseDto,
-    description:
-      'The deleted activity type, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The deleted activity type.',
   })
-  @ApiRefusals(401, 403)
-  remove(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 403, 404)
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
     return this.activityTypeService.remove(id);
   }
 }

@@ -2,8 +2,10 @@ import { PipeTransform, ValidationPipe } from '@nestjs/common';
 import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
+
 import { Role } from '../auth/models/role.model';
-import { routeOf } from '../common/testing/route-metadata';
+import { paramPipes, routeOf } from '../common/testing/route-metadata';
 import { ReservationsController } from './reservations.controller';
 import { ReservationsService } from './reservations.service';
 import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
@@ -118,5 +120,20 @@ describe('ReservationsController', () => {
     it('drops keys the query does not declare', async () => {
       expect(await run({ foo: 'x' })).not.toHaveProperty('foo');
     });
+  });
+
+  /**
+   * A malformed id is refused at the edge, after the guards, so it never reaches the
+   * database (D7, specs/008-fix-unknown-id-404).
+   */
+  describe('id binding', () => {
+    it.each(['findOne', 'update', 'remove'] as const)(
+      '%s checks its id with ParseObjectIdPipe',
+      (handler) => {
+        expect(paramPipes(ReservationsController, handler, 'id')).toContain(
+          ParseObjectIdPipe,
+        );
+      },
+    );
   });
 });

@@ -33,7 +33,7 @@ pnpm lint:ci && pnpm test && pnpm test:e2e && pnpm build && pnpm docs:check && p
 - Layering: controllers are HTTP-only, services own rules and are the only layer that touches models, and responses are projected through DTOs. No `any`.
 - Every endpoint needs `@ApiTags`, `@ApiOperation`, a success response with its body type (documentation-only `*-response.dto.ts` classes), and `@ApiRefusals(...)` from `src/common/decorators/`. Document only statuses the route really returns. `test/docs/` enforces this: completeness, agreement with the authorization matrix, a sample called for real, and one test per recorded discrepancy.
 - A change to any route's inputs, outputs or access must regenerate and commit `openapi.json` in the same PR. Where behaviour and apparent intent disagree, the contract states the behaviour and `specs/005-openapi-contract-export/discrepancies.md` records the gap.
-- Verify behaviour by running it, not by reading the source. Several by-id routes return 200 with an empty body despite code that looks like it throws 404.
+- Verify behaviour by running it, not by reading the source. Code that reads as correct has repeatedly behaved otherwise: by-id routes that looked like they threw 404 answered an empty 200 (D2), and a reservation list that looked bounded returned every record (D11).
 
 The product rules live in .specify/memory/constitution.md
 The product state lives in specs/README.md
