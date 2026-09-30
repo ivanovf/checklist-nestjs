@@ -27,9 +27,17 @@ the contract, this entry, and the test together.
   Pinned by `test/docs/pagination-query.e2e-spec.ts`, which stays green after the D4 fix
 - **Apparent intent**: optional values defaulting to 10 and 0. `ParseIntPipe` rejects
   `undefined` before the parameter default applies
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D1: …", and every list route in `test/docs/pagination-query.e2e-spec.ts`
-- **Principle**: —
+- **Evidence**: `test/docs/pagination-query.e2e-spec.ts` (regression suite; the D1 case was
+  removed from `contract-discrepancies.e2e-spec.ts`)
+- **Principle**: V (lists paginated with a bounded default and a hard maximum)
+- **Also found** (observed 2026-09-29): the values had no range. `limit=0` returned every
+  record, a negative `limit` was reinterpreted by the database (`-5` returned 5), there was no
+  maximum, and `offset=-1` was a **500**. All are fixed by the same change.
 - **Issue**: #7
+- **Status**: Resolved by `specs/007-fix-list-paging-defaults` (2026-09-30). Paging is
+  optional (`limit` 1–50 with default 10, `offset` ≥ 0 with default 0), anything else is refused
+  with 400, and the lists read in a fixed order by id. All four paged lists now share
+  `PaginationQueryDto`.
 
 ## D2 — An unknown id is answered as success
 

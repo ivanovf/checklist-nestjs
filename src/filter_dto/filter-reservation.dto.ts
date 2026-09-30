@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { FilterListDto } from './filter-list.dto';
+import { PaginationQueryDto } from './pagination-query.dto';
 import { Transform, TransformFnParams } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -21,7 +21,7 @@ const toFlag = ({ obj, key }: TransformFnParams): unknown => {
   return raw === 'true' ? true : raw === 'false' ? false : raw;
 };
 
-export class FilterReservationsDto extends FilterListDto {
+export class FilterReservationsDto extends PaginationQueryDto {
   @ApiPropertyOptional({ enum: ['airbnb', 'booking', 'direct'] })
   @IsOptional()
   @IsString()

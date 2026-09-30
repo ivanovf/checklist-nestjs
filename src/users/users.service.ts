@@ -75,7 +75,14 @@ export class UsersService {
   }
 
   async findAll(limit: number, offset: number) {
-    const users = await this.userModel.find().limit(limit).skip(offset).exec();
+    // `_id` gives a fixed order, so consecutive pages never repeat or skip a record. It is
+    // always indexed (constitution Principle V; specs/007-fix-list-paging-defaults, R5).
+    const users = await this.userModel
+      .find()
+      .sort({ _id: 1 })
+      .limit(limit)
+      .skip(offset)
+      .exec();
 
     return users.map((user) => this.skipPassword(user));
   }

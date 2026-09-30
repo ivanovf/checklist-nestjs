@@ -27,7 +27,9 @@ export class ItemsService {
   }
 
   findAll(limit: number, offset: number) {
-    return this.itemModel.find().limit(limit).skip(offset);
+    // `_id` gives a fixed order, so consecutive pages never repeat or skip a record. It is
+    // always indexed (constitution Principle V; specs/007-fix-list-paging-defaults, R5).
+    return this.itemModel.find().sort({ _id: 1 }).limit(limit).skip(offset);
   }
 
   findOne(id: string) {

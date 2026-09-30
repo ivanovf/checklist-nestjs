@@ -13,9 +13,10 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  * must update the contract, the register entry and this test together, so the contract
  * never silently goes stale.
  *
- * Not here: D4 is fixed (pinned by pagination-query.e2e-spec.ts), D11 is fixed by
- * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
- * and D14 is dead code with no behaviour to run.
+ * Not here: D1 and D4 are fixed (pinned by pagination-query.e2e-spec.ts; D1 by
+ * specs/007-fix-list-paging-defaults), D11 is fixed by specs/006-fix-reservation-paging (pinned
+ * by test/reservations/reservation-paging.e2e-spec.ts), and D14 is dead code with no behaviour
+ * to run.
  */
 describe('Recorded contract discrepancies', () => {
   let app: INestApplication;
@@ -41,10 +42,6 @@ describe('Recorded contract discrepancies', () => {
   });
 
   const http = () => request(app.getHttpServer());
-
-  it('D1: the account list refuses a request without paging values', async () => {
-    await http().get('/api/users/all').set(auth()).expect(400);
-  });
 
   it('D2: an unknown item id is answered 200 with an empty body', async () => {
     const res = await http()

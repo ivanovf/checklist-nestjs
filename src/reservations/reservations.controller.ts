@@ -24,7 +24,7 @@ import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
 import { ReservationResponseDto } from './dto/reservation-response.dto';
 import { DeletedResponseDto } from '../common/dto/deleted-response.dto';
 import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
-import { MAX_PAGE_SIZE } from '../filter_dto/filter-list.dto';
+import { MAX_PAGE_SIZE } from '../filter_dto/pagination-query.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/models/role.model';
 
@@ -70,7 +70,8 @@ export class ReservationsController {
     description: 'Matching reservations.',
   })
   @ApiRefusals(400, 401)
-  // Inherited from FilterListDto, which Swagger does not expand from the parent class.
+  // Declared by hand for their descriptions. The Swagger plugin does document the inherited
+  // PaginationQueryDto properties (specs/007-fix-list-paging-defaults, research R3).
   @ApiQuery({
     name: 'limit',
     required: false,

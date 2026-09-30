@@ -97,18 +97,25 @@
         "parameters": [
           {
             "name": "limit",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
             "schema": {
-              "type": "number"
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
             }
           },
           {
             "name": "offset",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Records to skip. Defaults to 0.",
             "schema": {
-              "type": "number"
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
             }
           }
         ],
@@ -425,18 +432,25 @@
         "parameters": [
           {
             "name": "limit",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
             "schema": {
-              "type": "number"
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
             }
           },
           {
             "name": "offset",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Records to skip. Defaults to 0.",
             "schema": {
-              "type": "number"
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
             }
           }
         ],
@@ -732,6 +746,29 @@
         "summary": "List reservations",
         "parameters": [
           {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Reservations to skip. Defaults to 0.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
             "name": "type",
             "required": false,
             "in": "query",
@@ -792,29 +829,6 @@
               "format": "date-time",
               "type": "string"
             }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 50,
-              "default": 10
-            },
-            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400."
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            },
-            "description": "Reservations to skip. Defaults to 0."
           }
         ],
         "responses": {
@@ -1100,18 +1114,25 @@
         "parameters": [
           {
             "name": "limit",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
             "schema": {
-              "type": "number"
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
             }
           },
           {
             "name": "offset",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Records to skip. Defaults to 0.",
             "schema": {
-              "type": "number"
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
             }
           }
         ],
