@@ -108,10 +108,20 @@ the contract, this entry, and the test together.
 - **Observed** (2026-09-28): read from the services, `find()` with no `limit`, so the
   whole collection is returned. None of the three accepts a paging parameter
 - **Apparent intent**: paginated, with a bounded default and a hard maximum
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D6: …"
+- **Evidence**: `test/docs/pagination-query.e2e-spec.ts` (activity types and configurations)
+  and `test/activity/activity-paging.e2e-spec.ts` (activities). The D6 case was removed from
+  `contract-discrepancies.e2e-spec.ts`
 - **Principle**: V ("Every list endpoint MUST be paginated … Unbounded `find()` … is
   prohibited")
+- **Also found** (observed 2026-10-01): paging values were silently ignored rather than
+  refused (`limit=5`, `limit=0`, `limit=abc` and `offset=-1` all answered 200 with every
+  record), and activities sharing a date came back in no fixed order. The activity list
+  sorted and filtered on fields with no index. All are fixed by the same change.
 - **Issue**: #11
+- **Status**: Resolved by `specs/011-fix-unbounded-lists` (2026-10-01). All three lists page like
+  the others (`limit` 1–50 with default 10, `offset` ≥ 0 with default 0, anything else refused
+  with 400). Activities read newest first with the id as a tie-break; activity types and
+  configurations read oldest first.
 
 ## D7 — A malformed id is a server error
 

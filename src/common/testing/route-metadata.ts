@@ -64,3 +64,21 @@ export function paramPipes<T>(
 
   return param?.[1].pipes ?? [];
 }
+
+/**
+ * The pipes bound to a route's whole query, `@Query(SomePipe)`, so a controller spec can
+ * assert how a list's query is converted without booting HTTP.
+ */
+export function queryPipes<T>(
+  controller: Type<T>,
+  handler: keyof T & string,
+): unknown[] {
+  const args: Record<string, { data?: unknown; pipes?: unknown[] }> =
+    Reflect.getMetadata(ROUTE_ARGS_METADATA, controller, handler) ?? {};
+  const query = Object.entries(args).find(
+    ([key, arg]) =>
+      key.startsWith(`${RouteParamtypes.QUERY}:`) && arg.data === undefined,
+  );
+
+  return query?.[1].pipes ?? [];
+}

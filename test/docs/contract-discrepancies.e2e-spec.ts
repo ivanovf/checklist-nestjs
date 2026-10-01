@@ -15,7 +15,9 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  *
  * Not here: D1 and D4 are fixed (pinned by pagination-query.e2e-spec.ts; D1 by
  * specs/007-fix-list-paging-defaults), D2 and D7 are fixed by specs/008-fix-unknown-id-404
- * (pinned by test/records/record-ids.e2e-spec.ts), D11 is fixed by
+ * (pinned by test/records/record-ids.e2e-spec.ts), D6 is fixed by
+ * specs/011-fix-unbounded-lists (pinned by pagination-query.e2e-spec.ts and
+ * test/activity/activity-paging.e2e-spec.ts), D11 is fixed by
  * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
  * and D14 is dead code with no behaviour to run.
  */
@@ -59,19 +61,6 @@ describe('Recorded contract discrepancies', () => {
       .set(auth())
       .send({ ...item, notAField: true })
       .expect(201);
-  });
-
-  it('D6: the activity type list returns every record, with no page limit', async () => {
-    for (let i = 0; i < 12; i++) {
-      await http()
-        .post('/api/activity-type')
-        .set(auth())
-        .send({ name: `Type ${i}`, budget: i })
-        .expect(201);
-    }
-
-    const res = await http().get('/api/activity-type').set(auth()).expect(200);
-    expect(res.body.length).toBeGreaterThanOrEqual(12);
   });
 
   it('D8: an update body with a wrongly typed field is a server error', async () => {
