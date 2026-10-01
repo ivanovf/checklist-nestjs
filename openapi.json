@@ -2815,7 +2815,8 @@
           "email",
           "password",
           "name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "UserResponseDto": {
         "type": "object",
@@ -2882,6 +2883,10 @@
           },
           "currentPassword": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
         },
         "required": [
@@ -2891,7 +2896,8 @@
           "name",
           "changePassword",
           "currentPassword"
-        ]
+        ],
+        "additionalProperties": false
       },
       "DeletedResponseDto": {
         "type": "object",
@@ -2933,7 +2939,8 @@
           "status",
           "description",
           "category"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ItemResponseDto": {
         "type": "object",
@@ -3005,8 +3012,49 @@
           },
           "category": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "ReservationItemDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "boolean"
+          },
+          "checked": {
+            "type": "object",
+            "default": false
+          },
+          "description": {
+            "type": "string"
+          },
+          "comments": {
+            "type": "object",
+            "default": ""
+          },
+          "category": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "The checklist entry's id; keeps it across saves."
+          }
+        },
+        "required": [
+          "label",
+          "status",
+          "description",
+          "category"
+        ],
+        "additionalProperties": false
       },
       "CreateReservationDto": {
         "type": "object",
@@ -3028,9 +3076,10 @@
           "contact": {
             "type": "string"
           },
-          "lockUser": {
+          "userLock": {
             "type": "string",
-            "description": "Accepted but currently not stored (discrepancy D15)."
+            "nullable": true,
+            "description": "The assigned lock: a lock code's user slot (e.g. 03), or a lock code's id for older reservations. Empty removes the lock."
           },
           "quantity": {
             "type": "number",
@@ -3043,7 +3092,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CreateItemDto"
+              "$ref": "#/components/schemas/ReservationItemDto"
             }
           }
         },
@@ -3055,7 +3104,8 @@
           "contact",
           "quantity",
           "items"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ReservationItemResponseDto": {
         "type": "object",
@@ -3124,6 +3174,9 @@
           "contact": {
             "type": "string"
           },
+          "userLock": {
+            "type": "string"
+          },
           "quantity": {
             "type": "number"
           },
@@ -3182,9 +3235,10 @@
           "contact": {
             "type": "string"
           },
-          "lockUser": {
+          "userLock": {
             "type": "string",
-            "description": "Accepted but currently not stored (discrepancy D15)."
+            "nullable": true,
+            "description": "The assigned lock: a lock code's user slot (e.g. 03), or a lock code's id for older reservations. Empty removes the lock."
           },
           "quantity": {
             "type": "number",
@@ -3197,10 +3251,15 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CreateItemDto"
+              "$ref": "#/components/schemas/ReservationItemDto"
             }
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CreateLockDto": {
         "type": "object",
@@ -3215,7 +3274,8 @@
         "required": [
           "lock",
           "userNumber"
-        ]
+        ],
+        "additionalProperties": false
       },
       "LockResponseDto": {
         "type": "object",
@@ -3258,8 +3318,13 @@
           },
           "userNumber": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LoginRequestDto": {
         "type": "object",
@@ -3373,7 +3438,8 @@
           "mainLock",
           "usersLimit",
           "analogLecture"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ConfigResponseDto": {
         "type": "object",
@@ -3430,8 +3496,13 @@
           },
           "analogLecture": {
             "type": "number"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TankLevelConfigDto": {
         "type": "object",
@@ -3444,13 +3515,18 @@
           },
           "time": {
             "type": "number"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
         },
         "required": [
           "analogLecture",
           "apiKey",
           "time"
-        ]
+        ],
+        "additionalProperties": false
       },
       "CreateActivityDto": {
         "type": "object",
@@ -3482,7 +3558,8 @@
           "status",
           "price",
           "date"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ActivityRecordResponseDto": {
         "type": "object",
@@ -3641,8 +3718,13 @@
           },
           "description": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ActivityDeletedResponseDto": {
         "type": "object",
@@ -3672,7 +3754,8 @@
         "required": [
           "name",
           "budget"
-        ]
+        ],
+        "additionalProperties": false
       },
       "UpdateActivityTypeDto": {
         "type": "object",
@@ -3686,8 +3769,13 @@
           },
           "description": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }

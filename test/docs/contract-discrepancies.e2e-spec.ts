@@ -19,6 +19,8 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  * specs/011-fix-unbounded-lists (pinned by pagination-query.e2e-spec.ts and
  * test/activity/activity-paging.e2e-spec.ts), D11 is fixed by
  * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
+ * D5 and D15 are fixed by specs/010-fix-unknown-fields (pinned by
+ * test/records/unknown-fields.e2e-spec.ts and test/reservations/reservation-lock.e2e-spec.ts),
  * and D14 is dead code with no behaviour to run.
  */
 describe('Recorded contract discrepancies', () => {
@@ -53,14 +55,6 @@ describe('Recorded contract discrepancies', () => {
 
     expect(res.body[0]).toHaveProperty('__v');
     expect(res.body[0]).not.toHaveProperty('password');
-  });
-
-  it('D5: an unknown body field is accepted rather than refused', async () => {
-    await http()
-      .post('/api/items')
-      .set(auth())
-      .send({ ...item, notAField: true })
-      .expect(201);
   });
 
   it('D8: an update body with a wrongly typed field is a server error', async () => {
@@ -129,25 +123,5 @@ describe('Recorded contract discrepancies', () => {
 
     await http().post('/api/users').set(auth()).send(account).expect(201);
     await http().post('/api/users').set(auth()).send(account).expect(201);
-  });
-
-  it('D15: a reservation accepts a lock user but does not keep it', async () => {
-    const res = await http()
-      .post('/api/reservations')
-      .set(auth())
-      .send({
-        dateIni: '2030-01-01T00:00:00.000Z',
-        dateEnd: '2030-01-02T00:00:00.000Z',
-        type: 'direct',
-        validated: false,
-        contact: 'c',
-        quantity: 1,
-        items: [],
-        lockUser: '5',
-      })
-      .expect(201);
-
-    expect(res.body).not.toHaveProperty('lockUser');
-    expect(res.body).not.toHaveProperty('userLock');
   });
 });

@@ -119,6 +119,66 @@ describe('API contract completeness', () => {
     });
   });
 
+  // specs/010-fix-unknown-fields (research R7): the validated request bodies refuse
+  // undeclared fields, so exactly those schemas are closed. Sign-in reads its body without
+  // validating it, so it stays open. Change bodies may repeat the record's own `_id`.
+  describe('request bodies', () => {
+    const schemas = (contract.components?.schemas ?? {}) as Record<
+      string,
+      SchemaObject
+    >;
+    const names = (keep: (schema: SchemaObject) => boolean) =>
+      Object.entries(schemas)
+        .filter(([, schema]) => keep(schema))
+        .map(([name]) => name)
+        .sort();
+
+    it('closes exactly the request bodies the service validates', () => {
+      expect(names((s) => s.additionalProperties === false)).toEqual(
+        [
+          'CreateActivityDto',
+          'CreateActivityTypeDto',
+          'CreateConfigDto',
+          'CreateItemDto',
+          'CreateLockDto',
+          'CreateReservationDto',
+          'CreateUserDto',
+          'ReservationItemDto',
+          'TankLevelConfigDto',
+          'UpdateActivityDto',
+          'UpdateActivityTypeDto',
+          'UpdateConfigDto',
+          'UpdateItemDto',
+          'UpdateLockDto',
+          'UpdateReservationDto',
+          'UpdateUserDto',
+        ].sort(),
+      );
+      expect(schemas.LoginRequestDto.additionalProperties).toBeUndefined();
+    });
+
+    it("lets exactly the change bodies repeat the record's own _id", () => {
+      const closedWithId = names(
+        (s) =>
+          s.additionalProperties === false && s.properties?._id !== undefined,
+      );
+
+      expect(closedWithId).toEqual(
+        [
+          'ReservationItemDto',
+          'TankLevelConfigDto',
+          'UpdateActivityDto',
+          'UpdateActivityTypeDto',
+          'UpdateConfigDto',
+          'UpdateItemDto',
+          'UpdateLockDto',
+          'UpdateReservationDto',
+          'UpdateUserDto',
+        ].sort(),
+      );
+    });
+  });
+
   // Check 5 — FR-008: no response shape carries a credential.
   it('never documents a password in a response', () => {
     const schemas = contract.components?.schemas ?? {};

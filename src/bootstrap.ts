@@ -1,10 +1,24 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 
+import { OwnIdInterceptor } from './common/interceptors/own-id.interceptor';
+import { RequestValidationPipe } from './common/pipes/request-validation.pipe';
 import { parseCorsOrigins } from './config/env.validation';
 import { buildOpenApiDocument } from './openapi/openapi-document';
+
+/**
+ * The request rules every route is held to (specs/010-fix-unknown-fields).
+ *
+ * Bodies and queries refuse undeclared fields, and pass on exactly what was sent (research
+ * R3). A change may repeat its record's own `_id` (research R4). Exported so the test app
+ * applies the very same rules rather than a copy of them.
+ */
+export function applyRequestRules(app: INestApplication): void {
+  app.useGlobalPipes(new RequestValidationPipe());
+  app.useGlobalInterceptors(new OwnIdInterceptor());
+}
 
 /**
  * Shared application wiring.
@@ -31,13 +45,7 @@ export function configureApp(app: INestApplication): void {
   // protective headers.
   app.use(helmet());
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
+  applyRequestRules(app);
 
   app.setGlobalPrefix('api');
 
