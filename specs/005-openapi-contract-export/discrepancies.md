@@ -101,6 +101,11 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D5: …"
 - **Principle**: IV ("MUST run with `whitelist: true` and `forbidNonWhitelisted: true`")
 - **Issue**: #10
+- **Status**: Resolved by `specs/010-fix-unknown-fields` (2026-10-01). Every body and every
+  list query refuses an undeclared field or parameter with **400** `property <name> should not
+  exist`, at any depth, and passes declared values on unchanged. `_id`, `createdAt`,
+  `updatedAt` and `__v` are refused, except that a change may repeat its record's own `_id`
+  (the mobile app sends it). Pinned by `test/records/unknown-fields.e2e-spec.ts`.
 
 ## D6 — Some list routes are unbounded
 
@@ -246,6 +251,11 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D15: …"
 - **Principle**: —
 - **Issue**: #20
+- **Status**: Resolved by `specs/010-fix-unknown-fields` (2026-10-01). The mobile app always
+  recorded the lock as `userLock` (a lock code's user slot, or a lock code's id in older
+  reservations), so `userLock` is now the declared field, stored and answered, and an empty
+  value removes the lock. The unused `lockUser` is refused. Pinned by
+  `test/reservations/reservation-lock.e2e-spec.ts`.
 
 ## D16 — An account password change can be refused with an undocumented 406
 

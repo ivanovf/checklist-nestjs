@@ -13,8 +13,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { CreateItemDto } from '../../items/dto/create-item.dto';
-import { IsDigitalNumber } from '../../validators/digital-number.validator';
+import { IsLockReference } from '../../validators/lock-reference.validator';
+import { ReservationItemDto } from './reservation-item.dto';
 
 export class CreateReservationDto {
   @IsDate()
@@ -41,12 +41,16 @@ export class CreateReservationDto {
   @ApiProperty()
   readonly contact: string;
 
+  // Replaces `lockUser`, which was never stored (D15). The mobile app has always sent the
+  // lock as `userLock` (specs/010-fix-unknown-fields, research R6).
   @IsOptional()
-  @IsDigitalNumber(10)
+  @IsLockReference()
   @ApiPropertyOptional({
-    description: 'Accepted but currently not stored (discrepancy D15).',
+    description:
+      "The assigned lock: a lock code's user slot (e.g. 03), or a lock code's id for older reservations. Empty removes the lock.",
+    nullable: true,
   })
-  readonly lockUser: string;
+  readonly userLock?: string | null;
 
   @IsNumber()
   @Min(1)
@@ -61,7 +65,7 @@ export class CreateReservationDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateItemDto)
+  @Type(() => ReservationItemDto)
   @ApiProperty()
-  readonly items: CreateItemDto[];
+  readonly items: ReservationItemDto[];
 }
