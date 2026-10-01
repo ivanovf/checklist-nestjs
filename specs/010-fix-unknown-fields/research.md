@@ -54,10 +54,11 @@ It composes two `ValidationPipe`s:
 parameters are refused.
 
 **Why returning the original query is still correct**:
-- The route-level query pipes (items, locks and users with `PaginationQueryDto`, and
-  reservations with `FilterReservationsDto`) run after the global pipe and still transform
-  the value and apply its defaults.
-- The activity list has no route pipe and receives the original query, as today.
+- The route-level query pipes (items, locks, users, activity types and configurations with
+  `PaginationQueryDto`, reservations with `FilterReservationsDto`, and activities with
+  `FilterActivityDto`) run after the global pipe and still transform the value and apply its
+  defaults. The last three gained their pipes in `specs/011-fix-unbounded-lists`, which was
+  merged while this feature was in progress.
 
 **Observed** (spike, with the real DTOs):
 
@@ -70,8 +71,9 @@ parameters are refused.
 | activity `?foo=1` | **400** |
 | reservation item with `y`, `PartialType` and `IntersectionType` bodies | refused, nested path named (`items.0.property y should not exist`) |
 
-**Not affected**: the configuration and activity-type lists bind no `@Query()`, so no pipe
-sees their query. A parameter sent there is still ignored (the spec's edge case).
+**Lists covered**: all seven. When this research was done, the configuration and
+activity-type lists bound no `@Query()` and ignored their query. Spec 011 gave them paging,
+so they are held to the same rule, and the e2e suite covers all seven.
 
 **Constraint for future DTOs**: a nested object or array needs `@ValidateNested` + `@Type`, or
 its contents aren't checked. Today that's only a reservation's `items`.
@@ -165,7 +167,7 @@ interceptor only handles top-level `_id`.
    schema. Update schemas and `TankLevelConfigDto` are used only by change operations, so the
    added property is accurate.
 
-The 400 status is already documented on all 15 body operations and on the 5 lists with
+The 400 status is already documented on all 15 body operations and on the 7 lists with
 declared parameters, so no `@ApiRefusals` changes.
 
 ## R8 — The test app must use the real request rules

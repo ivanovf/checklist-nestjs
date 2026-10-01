@@ -485,26 +485,26 @@ describe('Undeclared request fields (010)', () => {
     });
   });
 
+  // Every list declares its parameters. The configuration and activity-type lists gained
+  // paging in specs/011-fix-unbounded-lists, so all seven are held to the rule.
+  const LISTS = [
+    '/api/items/all?limit=5&offset=0',
+    '/api/locks/all?limit=5&offset=0',
+    '/api/users/all?limit=5&offset=0',
+    '/api/reservations/all?limit=5',
+    '/api/activity?status=TODO',
+    '/api/activity-type?limit=5&offset=0',
+    '/api/config?limit=5&offset=0',
+  ];
+
   describe('list query parameters', () => {
-    it.each([
-      '/api/items/all?limit=5&offset=0',
-      '/api/locks/all?limit=5&offset=0',
-      '/api/users/all?limit=5&offset=0',
-      '/api/reservations/all?limit=5',
-      '/api/activity?status=TODO',
-    ])('%s refuses an undeclared parameter', async (path) => {
+    it.each(LISTS)('%s refuses an undeclared parameter', async (path) => {
       const res = await http().get(`${path}&foo=1`).set(auth()).expect(400);
 
       expect(message(res)).toContain('property foo should not exist');
     });
 
-    it.each([
-      '/api/items/all?limit=5&offset=0',
-      '/api/locks/all?limit=5&offset=0',
-      '/api/users/all?limit=5&offset=0',
-      '/api/reservations/all?limit=5',
-      '/api/activity?status=TODO',
-    ])('%s accepts its declared parameters', async (path) => {
+    it.each(LISTS)('%s accepts its declared parameters', async (path) => {
       await http().get(path).set(auth()).expect(200);
     });
 
@@ -517,14 +517,6 @@ describe('Undeclared request fields (010)', () => {
         .set(auth())
         .expect(200);
     });
-
-    // These lists declare no parameters and never read the query.
-    it.each(['/api/config?foo=1', '/api/activity-type?foo=1'])(
-      '%s still ignores a parameter',
-      async (path) => {
-        await http().get(path).set(auth()).expect(200);
-      },
-    );
   });
 
   it('sign-in is out of scope and still accepts an extra field', async () => {

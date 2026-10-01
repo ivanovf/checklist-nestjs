@@ -32,7 +32,7 @@ They are used only by change operations. Create schemas don't get it.
 
 ## 4. Refusals
 
-No `@ApiRefusals` changes. 400 is already documented on all 15 body operations and on the 5
+No `@ApiRefusals` changes. 400 is already documented on all 15 body operations and on the 7
 lists with declared query parameters.
 
 ## 5. Behaviour behind the contract
@@ -49,8 +49,7 @@ lists with declared query parameters.
 | reservation with `userLock: "ul"` | stored | **400** |
 | reservation `PUT` with `userLock: ""` | stored as `""` | lock removed |
 | reservation with `lockUser` | 201, dropped | **400** (undeclared) |
-| `GET /api/{items,locks,users}/all`, `/api/reservations/all` or `/api/activity` with `?foo=1` | 200 | **400** `property foo should not exist` |
-| `GET /api/config?foo=1`, `/api/activity-type?foo=1` | 200 | 200 (no query read) |
+| any of the 7 lists (`/api/{items,locks,users}/all`, `/api/reservations/all`, `/api/activity`, `/api/activity-type`, `/api/config`) with `?foo=1` | 200 | **400** `property foo should not exist` |
 | `POST /api/login` with an extra field | 201 | 201 (out of scope) |
 | any request with only declared fields and parameters | as today | as today |
 

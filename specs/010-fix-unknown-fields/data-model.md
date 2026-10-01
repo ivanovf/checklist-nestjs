@@ -38,8 +38,8 @@ id as today. `POST/PUT /api/items` keep `CreateItemDto`/`UpdateItemDto`, without
 |---|---|
 | `GET /api/items/all`, `/api/locks/all`, `/api/users/all` | `limit`, `offset` (`PaginationQueryDto`) |
 | `GET /api/reservations/all` | `limit`, `offset`, `sort`, `type`, `old`, `validated`, `dateFrom`, `dateTo` |
-| `GET /api/activity` | `type`, `status`, `price` |
-| `GET /api/config`, `GET /api/activity-type` | none; the query isn't read and stays ignored |
+| `GET /api/activity` | `limit`, `offset`, `type`, `status`, `price` |
+| `GET /api/config`, `GET /api/activity-type` | `limit`, `offset` (`PaginationQueryDto`, since spec 011) |
 
 ## API-owned fields
 

@@ -37,6 +37,6 @@ Expected answers are in [contracts/request-rules.md](contracts/request-rules.md)
 | 7 | `PUT` that reservation with `"userLock":""`, then `GET` | no `userLock` |
 | 8 | `POST /api/reservations` with `"lockUser":"3"` | 400 |
 | 9 | `GET /api/items/all?limit=5&offset=0&foo=1` | 400; without `foo`, 200 |
-| 10 | `GET /api/config?foo=1` | 200 |
+| 10 | `GET /api/config?limit=5&offset=0&foo=1` | 400; without `foo`, 200 |
 | 11 | no token plus `notAField` | 401 |
 | 12 | **Mobile app** against `pnpm start:dev`: edit a reservation (checklist plus lock), a lock code, an activity and an activity type; browse each list | everything saves and loads as before |

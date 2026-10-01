@@ -227,7 +227,9 @@ the whole e2e suite in T013.
       `/api/users/all?…&foo=1`, `/api/reservations/all?foo=1` and `/api/activity?foo=1` → 400
       `property foo should not exist`;
     - the same without `foo` → 200;
-    - `/api/config?foo=1` and `/api/activity-type?foo=1` → 200 (green before and after);
+    - `/api/config?foo=1` and `/api/activity-type?foo=1` → 200 (green before and after).
+      *Superseded after rebasing onto spec 011, which gave both lists paging: they joined
+      the refusal set.*
     - the app's reservation query
       `?dateFrom=2026-01-01&dateTo=2026-12-31&sort=asc&type=direct&validated=true&limit=10&offset=0`
       → 200.

@@ -180,9 +180,8 @@ assigned. It ranks below US1 because it touches one field on one kind of record.
 - A list that declares query parameters refuses an undeclared one (`?foo=1` → 400 naming
   `foo`), including alongside valid paging parameters. Declared list parameters keep their
   current validation and defaults.
-- The configuration and activity-type lists declare no query parameters and don't read the
-  query at all, so a parameter sent to them is still ignored (200). There's nothing to
-  validate against.
+- The configuration and activity-type lists gained paging parameters in
+  `specs/011-fix-unbounded-lists`, so they are held to the same rule as the other lists.
 - A change whose `_id` is malformed, or a well-formed id other than the path's, is refused as a
   bad request naming `_id`. The path id keeps its own checks (spec 008).
 - A field sent as `null` or an empty value is still a declared field, judged by its own rules
@@ -212,7 +211,7 @@ assigned. It ranks below US1 because it touches one field on one kind of record.
 - **FR-006**: The rule MUST hold for every current operation and for any operation added later,
   without each operation having to opt in.
 - **FR-007**: Every list that declares query parameters (accounts, items, lock codes,
-  reservations, activities) MUST refuse an undeclared query parameter as a **bad request (400)**
+  reservations, activities, activity types and configurations) MUST refuse an undeclared query parameter as a **bad request (400)**
   naming it. Requests with only declared parameters MUST keep their current answers.
 - **FR-008**: The published API contract MUST say that undeclared fields are refused, and every
   operation the rule newly refuses MUST document its bad-request answer. It MUST NOT list a
@@ -256,7 +255,7 @@ assigned. It ranks below US1 because it touches one field on one kind of record.
   unchanged against the new API.
 - **SC-005**: The published contract and the running API agree on undeclared fields and on the
   reservation lock, with no recorded discrepancy left for D5 or D15.
-- **SC-006**: All 5 lists that declare query parameters refuse an undeclared one. Today none
+- **SC-006**: All 7 lists that declare query parameters refuse an undeclared one. Today none
   do.
 
 ## Assumptions
