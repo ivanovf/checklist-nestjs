@@ -445,13 +445,13 @@ the whole e2e suite in T013.
   change may repeat its own `_id`)".
 - [X] T032 Set `**Status**: Implemented` in `specs/010-fix-unknown-fields/spec.md`, and tick
   every task here.
-- [ ] T033 Commit the work, excluding the screenshots, with imperative summaries and a body
+- [X] T033 Commit the work, excluding the screenshots, with imperative summaries and a body
   explaining why. Then run `VERIFY_E2E=1 pnpm verify` on the clean tree. Record the e2e result
   and the coverage: 80% overall and `src/auth` ≥ 90% must not drop.
-- [ ] T034 Run the quickstart's scenarios 1–11 against `pnpm start:dev`, then scenario 12: the
+- [X] T034 Run the quickstart's scenarios 1–11 against `pnpm start:dev`, then scenario 12: the
   Flutter app against the local API. Edit a reservation (checklist plus lock), a lock code, an
   activity and an activity type, and browse every list. Record the outcome.
-- [ ] T035 Open the PR from `010-fix-unknown-fields` with `Closes #10` and `Closes #20`. It must
+- [X] T035 Open the PR from `010-fix-unknown-fields` with `Closes #10` and `Closes #20`. It must
   state:
   - the principles touched (I, II, III, IV);
   - **the IV violation** (no versioned path), accepted by the owner as a defect fix, with a
