@@ -223,11 +223,11 @@ activity types and configurations.
   - Add an "Also found" line (observed 2026-10-01): `limit`/`offset` were silently ignored rather than refused, and activities sharing a date had no fixed order. Both are fixed here, and the activity sort and filter fields are now indexed.
   - Add D17 if T020 confirmed it, with Issue "none yet".
 - [X] T023 [P] Set `**Status**: Implemented` in `specs/011-fix-unbounded-lists/spec.md`, and tick the tasks here as you go.
-- [ ] T024 Commit the work in the CLAUDE.md style (check the branch first) so the tree is clean (analysis F1). Then run all the gates on the committed HEAD with `VERIFY_E2E=1 pnpm verify` (it needs a clean tree), and record the results.
+- [X] T024 Commit the work in the CLAUDE.md style (check the branch first) so the tree is clean (analysis F1). Then run all the gates on the committed HEAD with `VERIFY_E2E=1 pnpm verify` (it needs a clean tree), and record the results.
   - Coverage must not drop below `main` (007 recorded 79.48%, already under the 80% floor before this work), and `src/auth` must stay ≥ 90%.
   - Fix any failure; don't skip it.
 - [ ] T025 Walk through `quickstart.md` § 2 against a running app on the local Docker Mongo, with read-only GETs only. Record the statuses.
-- [ ] T026 Draft the PR description; opening it needs the user's approval. It needs:
+- [X] T026 Draft the PR description; opening it needs the user's approval. It needs:
   - `Closes #11`, the root causes (R1), and the principles touched (I, II, IV, V).
   - **Flagged for reviewer** (R7):
     - Lists over 10 records now return one page.
@@ -317,3 +317,17 @@ Task: "T013 services apply skip/limit"
   8, sample 5, paging 122.
 - **Lint and unit tests**: lint is clean. 285/285 unit tests pass. Line coverage across all
   files is 89.62%, and the three modules are at 89.65–96%.
+- **T024**: `VERIFY_E2E=1 pnpm verify` passed on `f65c55e`.
+  - lint clean;
+  - unit 285/285, line coverage 89.62% (`main` 1bf750f measured at 87.93%), `src/auth`
+    threshold held;
+  - build and `docs:check` clean;
+  - audit: no high or critical (4 low and 11 moderate, pre-existing);
+  - e2e 596/596.
+
+  An earlier full e2e run had the by-id suite's `beforeAll` time out at 30 s while lint and
+  coverage ran alongside it on `/mnt/c`. It passed alone (83/83) and in the verify run.
+- **T025 not done**: the manual walkthrough needs the dev admin's seed password, which wasn't
+  available, and a token was not forged from the local secret. The same requests are covered
+  through `configureApp` against a real mongod in the e2e suites.
+- **T026**: PR description drafted. Opening it waits for the owner's approval.
