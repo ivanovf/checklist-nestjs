@@ -1692,10 +1692,34 @@
       "get": {
         "operationId": "ConfigController_findAll",
         "summary": "List device configurations",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Records to skip. Defaults to 0.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Every configuration, unpaginated (discrepancy D6).",
+            "description": "One page of configurations, oldest first.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1703,6 +1727,16 @@
                   "items": {
                     "$ref": "#/components/schemas/ConfigResponseDto"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -1959,6 +1993,29 @@
         "summary": "List activities",
         "parameters": [
           {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Records to skip. Defaults to 0.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
+            }
+          },
+          {
             "name": "type",
             "required": false,
             "in": "query",
@@ -1990,7 +2047,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Matching activities, newest first, unpaginated (discrepancy D6).",
+            "description": "One page of matching activities, newest first; activities on the same date, newest created first.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2316,10 +2373,34 @@
       "get": {
         "operationId": "ActivityTypeController_findAll",
         "summary": "List activity types",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Records to skip. Defaults to 0.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Every activity type, unpaginated (discrepancy D6).",
+            "description": "One page of activity types, oldest first.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2327,6 +2408,16 @@
                   "items": {
                     "$ref": "#/components/schemas/ActivityTypeResponseDto"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }

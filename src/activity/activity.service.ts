@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Activity } from './entities/activity.entity';
 import { ActivityType } from '../activity-type/entities/activity-type.entity';
 import { FilterActivityDto } from './dto/filter-activity.dto';
@@ -27,7 +27,8 @@ export class ActivityService {
   }
 
   findAll(filter: FilterActivityDto) {
-    const query: any = {};
+    // Only the filters become query conditions; `limit` and `offset` page the result.
+    const query: FilterQuery<Activity> = {};
 
     if (filter.type) {
       query.type = filter.type;
@@ -37,13 +38,20 @@ export class ActivityService {
       query.status = filter.status;
     }
 
-    if (filter.price) {
+    // Compared with undefined, not by truthiness: a price of 0 is a real filter. The handler
+    // used to get the raw string '0', which is truthy; converted, it is the falsy number 0.
+    if (filter.price !== undefined) {
       query.price = filter.price;
     }
 
+    // Newest first. Activities often share a date, so the id breaks ties: without it their
+    // order is not fixed and pages could repeat or skip them (specs/011-fix-unbounded-lists,
+    // R4). Both fields are indexed (activity.entity.ts).
     return this.activityModel
       .find(query)
-      .sort({ date: -1 })
+      .sort({ date: -1, _id: -1 })
+      .skip(filter.offset)
+      .limit(filter.limit)
       .populate('type')
       .exec();
   }

@@ -1,9 +1,16 @@
+import { ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 import { Role } from '../auth/models/role.model';
-import { paramPipes, routeOf } from '../common/testing/route-metadata';
+import {
+  paramPipes,
+  queryPipes,
+  routeOf,
+} from '../common/testing/route-metadata';
+import { FilterActivityDto } from './dto/filter-activity.dto';
+
 import { ActivityController } from './activity.controller';
 import { ActivityService } from './activity.service';
 
@@ -94,5 +101,43 @@ describe('ActivityController', () => {
         );
       },
     );
+  });
+
+  /**
+   * The global pipe validates but hands the handler the raw query, so paging defaults would
+   * never reach it. The route pipe converts it (D6, specs/011-fix-unbounded-lists, R3).
+   */
+  describe('list query', () => {
+    const convert = async (raw: object) => {
+      const [pipe] = queryPipes(ActivityController, 'findAll');
+      expect(pipe).toBeInstanceOf(ValidationPipe);
+
+      return (pipe as ValidationPipe).transform(raw, {
+        type: 'query',
+        metatype: FilterActivityDto,
+      });
+    };
+
+    it('applies the default page', async () => {
+      await expect(convert({})).resolves.toMatchObject({
+        limit: 10,
+        offset: 0,
+      });
+    });
+
+    it('converts the query strings', async () => {
+      await expect(
+        convert({ limit: '5', offset: '10' }),
+      ).resolves.toMatchObject({ limit: 5, offset: 10 });
+    });
+
+    it('still converts the price filter', async () => {
+      // `price` used to be converted only by the global pipe, on a copy it validated and
+      // threw away. Through this pipe it must convert on its own (observed 2026-10-01:
+      // `price=1` was refused with 400 until it did).
+      await expect(convert({ price: '1' })).resolves.toMatchObject({
+        price: 1,
+      });
+    });
   });
 });

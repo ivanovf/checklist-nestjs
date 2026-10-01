@@ -1,9 +1,16 @@
+import { ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 import { Role } from '../auth/models/role.model';
-import { paramPipes, routeOf } from '../common/testing/route-metadata';
+import {
+  paramPipes,
+  queryPipes,
+  routeOf,
+} from '../common/testing/route-metadata';
+import { PaginationQueryDto } from '../filter_dto/pagination-query.dto';
+
 import { ConfigController } from './config.controller';
 import { ConfigService } from './config.service';
 
@@ -60,8 +67,8 @@ describe('ConfigController', () => {
       expect(service.create).toHaveBeenCalledWith(dto);
     });
     it('findAll forwards its input and returns the service result', () => {
-      expect(controller.findAll()).toBe(result);
-      expect(service.findAll).toHaveBeenCalledWith();
+      expect(controller.findAll({ limit: 5, offset: 10 })).toBe(result);
+      expect(service.findAll).toHaveBeenCalledWith(5, 10);
     });
     it('update forwards its input and returns the service result', () => {
       expect(controller.update(id, dto)).toBe(result);
@@ -86,5 +93,34 @@ describe('ConfigController', () => {
         );
       },
     );
+  });
+
+  /**
+   * The global pipe validates but hands the handler the raw query, so paging defaults would
+   * never reach it. The route pipe converts it (D6, specs/011-fix-unbounded-lists, R3).
+   */
+  describe('list query', () => {
+    const convert = async (raw: object) => {
+      const [pipe] = queryPipes(ConfigController, 'findAll');
+      expect(pipe).toBeInstanceOf(ValidationPipe);
+
+      return (pipe as ValidationPipe).transform(raw, {
+        type: 'query',
+        metatype: PaginationQueryDto,
+      });
+    };
+
+    it('applies the default page', async () => {
+      await expect(convert({})).resolves.toMatchObject({
+        limit: 10,
+        offset: 0,
+      });
+    });
+
+    it('converts the query strings', async () => {
+      await expect(
+        convert({ limit: '5', offset: '10' }),
+      ).resolves.toMatchObject({ limit: 5, offset: 10 });
+    });
   });
 });

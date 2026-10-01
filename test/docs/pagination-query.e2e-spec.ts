@@ -3,6 +3,8 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as request from 'supertest';
 
+import { ActivityType } from '../../src/activity-type/entities/activity-type.entity';
+import { Config } from '../../src/config/entities/config.entity';
 import { Item } from '../../src/items/entities/item.entity';
 import { Lock } from '../../src/locks/entities/lock.entity';
 import { User } from '../../src/users/entities/user.entity';
@@ -10,23 +12,36 @@ import { createTestApp } from '../security/app-factory';
 import { seedAccounts, tokenFor } from '../support/auth-fixtures';
 
 /**
- * Paging on the account, item and lock lists (specs/007-fix-list-paging-defaults).
+ * Paging on every list that pages by position and reads oldest first.
  *
- * Regression suite for issue #7 (discrepancy D1): both values were required despite their
- * documented defaults. It also covers the defects found with it: `limit=0` returned every
- * record, a negative `limit` was reinterpreted, there was no maximum, and `offset=-1` was a
- * server error. The rules are the ones the reservation list uses (006).
+ * - Accounts, items and locks (specs/007-fix-list-paging-defaults): regression suite for
+ *   issue #7 (discrepancy D1). Both values were required despite their documented defaults,
+ *   `limit=0` returned every record, a negative `limit` was reinterpreted, there was no
+ *   maximum, and `offset=-1` was a server error.
+ * - Activity types and configurations (specs/011-fix-unbounded-lists): regression suite for
+ *   issue #11 (discrepancy D6). Both lists returned their whole collection and silently
+ *   ignored any paging value.
+ *
+ * The rules are the ones the reservation list uses (006). Activities page the same way but
+ * read newest first; see test/activity/activity-paging.e2e-spec.ts.
  *
  * Fixture: exactly 15 records in each list. For accounts that means the 2 signed-in accounts
- * plus 13 more. The in-memory mongod is shared by the whole e2e run, so the three
- * collections are cleared first.
+ * plus 13 more. The in-memory mongod is shared by the whole e2e run, so the collections are
+ * cleared first.
  */
-const ROUTES = ['/api/users/all', '/api/items/all', '/api/locks/all'];
+const ROUTES = [
+  '/api/users/all',
+  '/api/items/all',
+  '/api/locks/all',
+  '/api/activity-type',
+  '/api/config',
+];
 const TOTAL = 15;
 
 describe('List paging (007)', () => {
   let app: INestApplication;
   let token: string;
+  let guestToken: string;
   const seeded: Record<string, string[]> = {};
 
   beforeAll(async () => {
@@ -35,14 +50,21 @@ describe('List paging (007)', () => {
     const users = app.get<Model<User>>(getModelToken(User.name));
     const items = app.get<Model<Item>>(getModelToken(Item.name));
     const locks = app.get<Model<Lock>>(getModelToken(Lock.name));
+    const types = app.get<Model<ActivityType>>(
+      getModelToken(ActivityType.name),
+    );
+    const configs = app.get<Model<Config>>(getModelToken(Config.name));
     await Promise.all([
       users.deleteMany({}),
       items.deleteMany({}),
       locks.deleteMany({}),
+      types.deleteMany({}),
+      configs.deleteMany({}),
     ]);
 
     const { admin, guest } = await seedAccounts(app);
     token = await tokenFor(app, admin);
+    guestToken = await tokenFor(app, guest);
 
     const idsOf = (docs: Array<{ _id: unknown }>) =>
       docs.map((doc) => String(doc._id));
@@ -79,6 +101,23 @@ describe('List paging (007)', () => {
         Array.from({ length: TOTAL }, (_, i) => ({
           lock: `lock-${n(i)}`,
           userNumber: `10${n(i)}`,
+        })),
+      ),
+    );
+    seeded['/api/activity-type'] = idsOf(
+      await types.insertMany(
+        Array.from({ length: TOTAL }, (_, i) => ({
+          name: `type-${n(i)}`,
+          budget: i,
+        })),
+      ),
+    );
+    seeded['/api/config'] = idsOf(
+      await configs.insertMany(
+        Array.from({ length: TOTAL }, (_, i) => ({
+          doorLock: `door-${n(i)}`,
+          mainLock: `main-${n(i)}`,
+          usersLimit: 20,
         })),
       ),
     );
@@ -193,6 +232,15 @@ describe('List paging (007)', () => {
         await get(route, 'limit=10&offset=0', false).expect(401);
       });
     });
+  });
+
+  it('checks permission before the paging values on the activity type list', async () => {
+    // Administrators only: a standard account is refused as forbidden, never as a bad
+    // request, whatever it sends (spec edge case; analysis C1).
+    await request(app.getHttpServer())
+      .get('/api/activity-type?limit=0')
+      .set('Authorization', `Bearer ${guestToken}`)
+      .expect(403);
   });
 
   it('never exposes a password on the account list', async () => {

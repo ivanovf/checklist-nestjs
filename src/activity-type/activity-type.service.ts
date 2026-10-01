@@ -17,8 +17,15 @@ export class ActivityTypeService {
     return newActivityType.save();
   }
 
-  findAll() {
-    return this.activityTypeModel.find();
+  findAll(limit: number, offset: number) {
+    // `_id` gives a total order, so consecutive pages never repeat or skip a record. It is
+    // always indexed (constitution Principle V; specs/011-fix-unbounded-lists, R4).
+    return this.activityTypeModel
+      .find()
+      .sort({ _id: 1 })
+      .skip(offset)
+      .limit(limit)
+      .exec();
   }
 
   // Each by-id operation awaits its query and refuses an unknown id. They used to return the

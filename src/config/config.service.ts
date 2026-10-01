@@ -15,13 +15,17 @@ export class ConfigService {
     return newConfig.save();
   }
 
-  findAll() {
-    const conf = this.configModel.find();
-
-    if (!conf) {
-      throw new NotFoundException(`Configs not found`);
-    }
-    return conf;
+  // There used to be a not-found check here. It tested the unawaited query, which is never
+  // falsy, so it could not fire; an empty list answers `[]` (specs/011-fix-unbounded-lists).
+  findAll(limit: number, offset: number) {
+    // `_id` gives a total order, so consecutive pages never repeat or skip a record. It is
+    // always indexed (constitution Principle V; specs/011-fix-unbounded-lists, R4).
+    return this.configModel
+      .find()
+      .sort({ _id: 1 })
+      .skip(offset)
+      .limit(limit)
+      .exec();
   }
 
   async update(id: string, updateConfigDto: UpdateConfigDto) {

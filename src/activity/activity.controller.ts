@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -53,10 +54,16 @@ export class ActivityController {
   @ApiOkResponse({
     type: [ActivityResponseDto],
     description:
-      'Matching activities, newest first, unpaginated (discrepancy D6).',
+      'One page of matching activities, newest first; activities on the same date, newest created first.',
   })
   @ApiRefusals(400, 401)
-  findAll(@Query() filterActivityDto: FilterActivityDto) {
+  findAll(
+    // The global pipe validates a copy and hands the handler the raw query, so the paging
+    // defaults would never arrive. This pipe passes the converted, defaulted DTO instead. The
+    // list used to return its whole collection (D6, specs/011-fix-unbounded-lists).
+    @Query(new ValidationPipe({ transform: true, whitelist: true }))
+    filterActivityDto: FilterActivityDto,
+  ) {
     return this.activityService.findAll(filterActivityDto);
   }
 

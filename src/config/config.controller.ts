@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Put, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Patch,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -15,6 +25,7 @@ import { UpdateConfigDto } from './dto/update-config.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/models/role.model';
 import { TankLevelConfigDto } from './dto/tank-level-config.dto';
+import { PaginationQueryDto } from '../filter_dto/pagination-query.dto';
 
 @ApiTags('Config')
 @ApiBearerAuth()
@@ -39,11 +50,17 @@ export class ConfigController {
   @ApiOperation({ summary: 'List device configurations' })
   @ApiOkResponse({
     type: [ConfigResponseDto],
-    description: 'Every configuration, unpaginated (discrepancy D6).',
+    description: 'One page of configurations, oldest first.',
   })
-  @ApiRefusals(401)
-  findAll() {
-    return this.configService.findAll();
+  @ApiRefusals(400, 401)
+  findAll(
+    // The global pipe validates a copy and hands the handler the raw query, so the paging
+    // defaults would never arrive. This pipe passes the converted, defaulted DTO instead. The
+    // list used to return its whole collection (D6, specs/011-fix-unbounded-lists).
+    @Query(new ValidationPipe({ transform: true, whitelist: true }))
+    query: PaginationQueryDto,
+  ) {
+    return this.configService.findAll(query.limit, query.offset);
   }
 
   @Roles(Role.ADMIN)
