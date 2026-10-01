@@ -15,15 +15,17 @@ export class LocksService {
     return newLock.save();
   }
 
-  update(id: string, updateLockDto: UpdateLockDto) {
-    const lockUpdate = this.lockModel
+  async update(id: string, updateLockDto: UpdateLockDto) {
+    // Awaited before the check: an unawaited query is always truthy, so the not-found branch
+    // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
+    const updated = await this.lockModel
       .findByIdAndUpdate(id, { $set: updateLockDto }, { new: true })
       .exec();
 
-    if (!lockUpdate) {
-      throw new NotFoundException(id);
+    if (!updated) {
+      throw new NotFoundException(`lock #${id} not found`);
     }
-    return lockUpdate;
+    return updated;
   }
 
   findAll(limit: number, offset: number) {
@@ -32,20 +34,21 @@ export class LocksService {
     return this.lockModel.find().sort({ _id: 1 }).limit(limit).skip(offset);
   }
 
-  findOne(id: string) {
-    const lock = this.lockModel.findById(id);
+  async findOne(id: string) {
+    const found = await this.lockModel.findById(id).exec();
 
-    if (!lock) {
-      throw new NotFoundException(`Lock #${id} not found`);
+    if (!found) {
+      throw new NotFoundException(`lock #${id} not found`);
     }
-    return lock;
+    return found;
   }
 
-  remove(id: string) {
-    const lock = this.lockModel.findByIdAndDelete(id).exec();
+  async remove(id: string) {
+    // Reports a deletion only when a record was actually deleted.
+    const removed = await this.lockModel.findByIdAndDelete(id).exec();
 
-    if (!lock) {
-      throw new NotFoundException(id);
+    if (!removed) {
+      throw new NotFoundException(`lock #${id} not found`);
     }
     return { deleted: true };
   }

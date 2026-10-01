@@ -60,25 +60,25 @@ export class ActivityService {
     return activity;
   }
 
-  update(id: string, updateActivityDto: UpdateActivityDto) {
-    return this.activityModel.findByIdAndUpdate(
-      id,
-      { $set: updateActivityDto },
-      { new: true },
-    );
+  async update(id: string, updateActivityDto: UpdateActivityDto) {
+    // There was no existence check, so an unknown id was answered as an empty success
+    // (D2, specs/008-fix-unknown-id-404).
+    const updated = await this.activityModel
+      .findByIdAndUpdate(id, { $set: updateActivityDto }, { new: true })
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException('Activity not found');
+    }
+    return updated;
   }
 
   async remove(id: string) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new Error('Invalid id');
-    }
+    const removed = await this.activityModel.findByIdAndDelete(id).exec();
 
-    const activity = await this.activityModel.findById(id).exec();
-
-    if (!activity) {
+    if (!removed) {
       throw new NotFoundException('Activity not found');
     }
-
-    return this.activityModel.findByIdAndDelete(id);
+    return removed;
   }
 }

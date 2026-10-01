@@ -1,5 +1,10 @@
 import { RequestMethod, Type } from '@nestjs/common';
-import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
+import {
+  METHOD_METADATA,
+  PATH_METADATA,
+  ROUTE_ARGS_METADATA,
+} from '@nestjs/common/constants';
+import { RouteParamtypes } from '@nestjs/common/enums/route-paramtypes.enum';
 
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
@@ -39,4 +44,23 @@ export function routeOf<T>(
     roles: read<string[]>('roles'),
     isPublic: read<boolean>(IS_PUBLIC_KEY) === true,
   };
+}
+
+/**
+ * The pipes bound to one named route parameter, e.g. the `id` of `@Param('id', SomePipe)`, so
+ * a controller spec can assert how a path value is checked without booting HTTP.
+ */
+export function paramPipes<T>(
+  controller: Type<T>,
+  handler: keyof T & string,
+  name: string,
+): unknown[] {
+  const args: Record<string, { data?: unknown; pipes?: unknown[] }> =
+    Reflect.getMetadata(ROUTE_ARGS_METADATA, controller, handler) ?? {};
+  const param = Object.entries(args).find(
+    ([key, arg]) =>
+      key.startsWith(`${RouteParamtypes.PARAM}:`) && arg.data === name,
+  );
+
+  return param?.[1].pipes ?? [];
 }

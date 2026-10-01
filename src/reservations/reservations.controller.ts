@@ -23,6 +23,7 @@ import {
 import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
 import { ReservationResponseDto } from './dto/reservation-response.dto';
 import { DeletedResponseDto } from '../common/dto/deleted-response.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
 import { MAX_PAGE_SIZE } from '../filter_dto/pagination-query.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -98,11 +99,10 @@ export class ReservationsController {
   @ApiOperation({ summary: 'Get a reservation' })
   @ApiOkResponse({
     type: ReservationResponseDto,
-    description:
-      'The reservation, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The reservation.',
   })
-  @ApiRefusals(401)
-  findOne(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 404)
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.reservationsService.findOne(id);
   }
 
@@ -111,12 +111,11 @@ export class ReservationsController {
   @ApiOperation({ summary: 'Update a reservation' })
   @ApiOkResponse({
     type: ReservationResponseDto,
-    description:
-      'The updated reservation, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The updated reservation.',
   })
-  @ApiRefusals(400, 401)
+  @ApiRefusals(400, 401, 404)
   update(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateReservationDto: UpdateReservationDto,
   ) {
     return this.reservationsService.update(id, updateReservationDto);
@@ -127,11 +126,10 @@ export class ReservationsController {
   @ApiOperation({ summary: 'Delete a reservation' })
   @ApiOkResponse({
     type: DeletedResponseDto,
-    description:
-      'Deleted. Also answered for an id that matches no reservation (discrepancy D2).',
+    description: 'Deleted.',
   })
-  @ApiRefusals(401, 403)
-  remove(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 403, 404)
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
     return this.reservationsService.remove(id);
   }
 }

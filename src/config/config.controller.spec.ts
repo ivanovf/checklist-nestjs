@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
+
 import { Role } from '../auth/models/role.model';
-import { routeOf } from '../common/testing/route-metadata';
+import { paramPipes, routeOf } from '../common/testing/route-metadata';
 import { ConfigController } from './config.controller';
 import { ConfigService } from './config.service';
 
@@ -69,5 +71,20 @@ describe('ConfigController', () => {
       expect(controller.updateAnalogLecure(id, dto)).toBe(result);
       expect(service.updateAnalogLecure).toHaveBeenCalledWith(id, dto);
     });
+  });
+
+  /**
+   * A malformed id is refused at the edge, after the guards, so it never reaches the
+   * database (D7, specs/008-fix-unknown-id-404).
+   */
+  describe('id binding', () => {
+    it.each(['update', 'updateAnalogLecure'] as const)(
+      '%s checks its id with ParseObjectIdPipe',
+      (handler) => {
+        expect(paramPipes(ConfigController, handler, 'id')).toContain(
+          ParseObjectIdPipe,
+        );
+      },
+    );
   });
 });

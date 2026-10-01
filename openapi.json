@@ -189,6 +189,16 @@
               }
             }
           },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "401": {
             "description": "No valid credentials were supplied.",
             "content": {
@@ -313,6 +323,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -515,7 +535,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The item, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The item.",
             "content": {
               "application/json": {
                 "schema": {
@@ -524,8 +544,28 @@
               }
             }
           },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "401": {
             "description": "No valid credentials were supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -569,7 +609,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated item, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The updated item.",
             "content": {
               "application/json": {
                 "schema": {
@@ -607,6 +647,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -633,11 +683,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Deleted. Also answered for an id that matches no item (discrepancy D2).",
+            "description": "Deleted.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -654,6 +714,16 @@
           },
           "403": {
             "description": "The caller is signed in but lacks the required role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -892,7 +962,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The reservation, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The reservation.",
             "content": {
               "application/json": {
                 "schema": {
@@ -901,8 +971,28 @@
               }
             }
           },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "401": {
             "description": "No valid credentials were supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -946,7 +1036,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated reservation, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The updated reservation.",
             "content": {
               "application/json": {
                 "schema": {
@@ -967,6 +1057,16 @@
           },
           "401": {
             "description": "No valid credentials were supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1000,11 +1100,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Deleted. Also answered for an id that matches no reservation (discrepancy D2).",
+            "description": "Deleted.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -1021,6 +1131,16 @@
           },
           "403": {
             "description": "The caller is signed in but lacks the required role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1197,7 +1317,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The lock code, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The lock code.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1206,8 +1326,28 @@
               }
             }
           },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "401": {
             "description": "No valid credentials were supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1251,7 +1391,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated lock code, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The updated lock code.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1289,6 +1429,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1315,11 +1465,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Deleted. Also answered for an id that matches no lock code (discrepancy D2).",
+            "description": "Deleted.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeletedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -1336,6 +1496,16 @@
           },
           "403": {
             "description": "The caller is signed in but lacks the required role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1584,7 +1754,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated configuration, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The updated configuration.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1615,6 +1785,16 @@
           },
           "403": {
             "description": "The caller is signed in but lacks the required role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1658,7 +1838,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated configuration, or an empty body when no record has this id (discrepancy D2). A wrong device key is refused with 404 (discrepancy D10).",
+            "description": "The updated configuration. A wrong device key is refused with 404 (discrepancy D10).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1878,6 +2058,16 @@
               }
             }
           },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "401": {
             "description": "No valid credentials were supplied.",
             "content": {
@@ -1933,7 +2123,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated activity with its type as an id, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The updated activity with its type as an id.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1954,6 +2144,16 @@
           },
           "401": {
             "description": "No valid credentials were supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1992,6 +2192,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ActivityDeletedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -2168,11 +2378,21 @@
         ],
         "responses": {
           "200": {
-            "description": "The activity type, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The activity type.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ActivityTypeResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -2189,6 +2409,16 @@
           },
           "403": {
             "description": "The caller is signed in but lacks the required role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2232,7 +2462,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated activity type, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The updated activity type.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2270,6 +2500,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -2296,11 +2536,21 @@
         ],
         "responses": {
           "200": {
-            "description": "The deleted activity type, or an empty body when no record has this id (discrepancy D2).",
+            "description": "The deleted activity type.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ActivityTypeResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -2317,6 +2567,16 @@
           },
           "403": {
             "description": "The caller is signed in but lacks the required role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
             "content": {
               "application/json": {
                 "schema": {

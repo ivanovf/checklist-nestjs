@@ -19,6 +19,7 @@ import {
 import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
 import { ItemResponseDto } from './dto/item-response.dto';
 import { DeletedResponseDto } from '../common/dto/deleted-response.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 import { ItemsService } from './items.service';
 import { PaginationQueryDto } from '../filter_dto/pagination-query.dto';
@@ -68,11 +69,10 @@ export class ItemsController {
   @ApiOperation({ summary: 'Get a checklist item' })
   @ApiOkResponse({
     type: ItemResponseDto,
-    description:
-      'The item, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The item.',
   })
-  @ApiRefusals(401)
-  findOne(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 404)
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.itemsService.findOne(id);
   }
 
@@ -81,11 +81,13 @@ export class ItemsController {
   @ApiOperation({ summary: 'Update a checklist item' })
   @ApiOkResponse({
     type: ItemResponseDto,
-    description:
-      'The updated item, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The updated item.',
   })
-  @ApiRefusals(400, 401, 403)
-  update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto) {
+  @ApiRefusals(400, 401, 403, 404)
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateItemDto: UpdateItemDto,
+  ) {
     return this.itemsService.update(id, updateItemDto);
   }
 
@@ -94,11 +96,10 @@ export class ItemsController {
   @ApiOperation({ summary: 'Delete a checklist item' })
   @ApiOkResponse({
     type: DeletedResponseDto,
-    description:
-      'Deleted. Also answered for an id that matches no item (discrepancy D2).',
+    description: 'Deleted.',
   })
-  @ApiRefusals(401, 403)
-  remove(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 403, 404)
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
     return this.itemsService.remove(id);
   }
 }

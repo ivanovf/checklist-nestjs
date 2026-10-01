@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
+
 import { Role } from '../auth/models/role.model';
-import { routeOf } from '../common/testing/route-metadata';
+import { paramPipes, routeOf } from '../common/testing/route-metadata';
 import { ItemsController } from './items.controller';
 import { ItemsService } from './items.service';
 
@@ -75,5 +77,20 @@ describe('ItemsController', () => {
       expect(controller.remove(id)).toBe(result);
       expect(service.remove).toHaveBeenCalledWith(id);
     });
+  });
+
+  /**
+   * A malformed id is refused at the edge, after the guards, so it never reaches the
+   * database (D7, specs/008-fix-unknown-id-404).
+   */
+  describe('id binding', () => {
+    it.each(['findOne', 'update', 'remove'] as const)(
+      '%s checks its id with ParseObjectIdPipe',
+      (handler) => {
+        expect(paramPipes(ItemsController, handler, 'id')).toContain(
+          ParseObjectIdPipe,
+        );
+      },
+    );
   });
 });

@@ -19,6 +19,7 @@ import {
 import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
 import { LockResponseDto } from './dto/lock-response.dto';
 import { DeletedResponseDto } from '../common/dto/deleted-response.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 import { LocksService } from './locks.service';
 import { PaginationQueryDto } from '../filter_dto/pagination-query.dto';
@@ -68,11 +69,10 @@ export class LocksController {
   @ApiOperation({ summary: 'Get a lock code' })
   @ApiOkResponse({
     type: LockResponseDto,
-    description:
-      'The lock code, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The lock code.',
   })
-  @ApiRefusals(401)
-  findOne(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 404)
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.locksService.findOne(id);
   }
 
@@ -81,11 +81,13 @@ export class LocksController {
   @ApiOperation({ summary: 'Update a lock code' })
   @ApiOkResponse({
     type: LockResponseDto,
-    description:
-      'The updated lock code, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The updated lock code.',
   })
-  @ApiRefusals(400, 401, 403)
-  update(@Param('id') id: string, @Body() updateLockDto: UpdateLockDto) {
+  @ApiRefusals(400, 401, 403, 404)
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateLockDto: UpdateLockDto,
+  ) {
     return this.locksService.update(id, updateLockDto);
   }
 
@@ -94,11 +96,10 @@ export class LocksController {
   @ApiOperation({ summary: 'Delete a lock code' })
   @ApiOkResponse({
     type: DeletedResponseDto,
-    description:
-      'Deleted. Also answered for an id that matches no lock code (discrepancy D2).',
+    description: 'Deleted.',
   })
-  @ApiRefusals(401, 403)
-  remove(@Param('id') id: string) {
+  @ApiRefusals(400, 401, 403, 404)
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
     return this.locksService.remove(id);
   }
 }

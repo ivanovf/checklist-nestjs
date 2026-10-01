@@ -7,6 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiRefusals } from '../common/decorators/api-refusals.decorator';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { ConfigResponseDto } from './dto/config-response.dto';
 import { ConfigService } from './config.service';
 import { CreateConfigDto } from './dto/create-config.dto';
@@ -50,11 +51,13 @@ export class ConfigController {
   @ApiOperation({ summary: 'Update a device configuration' })
   @ApiOkResponse({
     type: ConfigResponseDto,
-    description:
-      'The updated configuration, or an empty body when no record has this id (discrepancy D2).',
+    description: 'The updated configuration.',
   })
-  @ApiRefusals(400, 401, 403)
-  update(@Param('id') id: string, @Body() updateConfigDto: UpdateConfigDto) {
+  @ApiRefusals(400, 401, 403, 404)
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateConfigDto: UpdateConfigDto,
+  ) {
     return this.configService.update(id, updateConfigDto);
   }
 
@@ -66,11 +69,11 @@ export class ConfigController {
   @ApiOkResponse({
     type: ConfigResponseDto,
     description:
-      'The updated configuration, or an empty body when no record has this id (discrepancy D2). A wrong device key is refused with 404 (discrepancy D10).',
+      'The updated configuration. A wrong device key is refused with 404 (discrepancy D10).',
   })
   @ApiRefusals(400, 401, 404)
   updateAnalogLecure(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() tankLevelConfigDto: TankLevelConfigDto,
   ) {
     return this.configService.updateAnalogLecure(id, tankLevelConfigDto);

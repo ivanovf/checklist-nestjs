@@ -14,14 +14,14 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  * never silently goes stale.
  *
  * Not here: D1 and D4 are fixed (pinned by pagination-query.e2e-spec.ts; D1 by
- * specs/007-fix-list-paging-defaults), D11 is fixed by specs/006-fix-reservation-paging (pinned
- * by test/reservations/reservation-paging.e2e-spec.ts), and D14 is dead code with no behaviour
- * to run.
+ * specs/007-fix-list-paging-defaults), D2 and D7 are fixed by specs/008-fix-unknown-id-404
+ * (pinned by test/records/record-ids.e2e-spec.ts), D11 is fixed by
+ * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
+ * and D14 is dead code with no behaviour to run.
  */
 describe('Recorded contract discrepancies', () => {
   let app: INestApplication;
   let admin: string;
-  const UNKNOWN = '6aba80d38c58c96b58020000';
   const auth = () => ({ Authorization: `Bearer ${admin}` });
 
   const item = {
@@ -42,22 +42,6 @@ describe('Recorded contract discrepancies', () => {
   });
 
   const http = () => request(app.getHttpServer());
-
-  it('D2: an unknown item id is answered 200 with an empty body', async () => {
-    const res = await http()
-      .get(`/api/items/${UNKNOWN}`)
-      .set(auth())
-      .expect(200);
-
-    expect(res.text).toBe('');
-  });
-
-  it('D2: deleting an unknown item still reports it deleted', async () => {
-    await http()
-      .delete(`/api/items/${UNKNOWN}`)
-      .set(auth())
-      .expect(200, { deleted: true });
-  });
 
   it('D3: a stored record is returned with its internal version field', async () => {
     const res = await http()
@@ -88,10 +72,6 @@ describe('Recorded contract discrepancies', () => {
 
     const res = await http().get('/api/activity-type').set(auth()).expect(200);
     expect(res.body.length).toBeGreaterThanOrEqual(12);
-  });
-
-  it('D7: a malformed id is a server error', async () => {
-    await http().get('/api/items/not-an-id').set(auth()).expect(500);
   });
 
   it('D8: an update body with a wrongly typed field is a server error', async () => {
