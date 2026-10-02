@@ -15,9 +15,11 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  *
  * Not here: D1 and D4 are fixed (pinned by pagination-query.e2e-spec.ts; D1 by
  * specs/007-fix-list-paging-defaults), D2 and D7 are fixed by specs/008-fix-unknown-id-404
- * (pinned by test/records/record-ids.e2e-spec.ts), D11 is fixed by
- * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
- * and D14 is dead code with no behaviour to run.
+ * (pinned by test/records/record-ids.e2e-spec.ts), D3 is fixed by
+ * specs/009-fix-unprojected-records (pinned by test/records/record-fields.e2e-spec.ts), D11 is
+ * fixed by specs/006-fix-reservation-paging (pinned by
+ * test/reservations/reservation-paging.e2e-spec.ts), and D14 is dead code with no behaviour to
+ * run.
  */
 describe('Recorded contract discrepancies', () => {
   let app: INestApplication;
@@ -42,16 +44,6 @@ describe('Recorded contract discrepancies', () => {
   });
 
   const http = () => request(app.getHttpServer());
-
-  it('D3: a stored record is returned with its internal version field', async () => {
-    const res = await http()
-      .get('/api/users/all?limit=1&offset=0')
-      .set(auth())
-      .expect(200);
-
-    expect(res.body[0]).toHaveProperty('__v');
-    expect(res.body[0]).not.toHaveProperty('password');
-  });
 
   it('D5: an unknown body field is accepted rather than refused', async () => {
     await http()

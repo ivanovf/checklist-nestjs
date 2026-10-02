@@ -79,6 +79,10 @@ export class UsersController {
   @Put(':id')
   @ApiOperation({
     summary: 'Update an account (every field is required, discrepancy D9)',
+    description:
+      'With `changePassword: false` the stored password is left unchanged, and `password` and ' +
+      '`currentPassword` are ignored. With `changePassword: true`, `currentPassword` is ' +
+      'verified and `password` becomes the new password.',
   })
   @ApiOkResponse({
     type: UserResponseDto,

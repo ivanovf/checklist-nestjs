@@ -3,6 +3,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as request from 'supertest';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 import { User } from '../../src/users/entities/user.entity';
 import { Role } from '../../src/auth/models/role.model';
@@ -24,14 +25,19 @@ export const GUEST_PASSWORD = 'guest-password';
  * authorization matrix can be exercised in full.
  */
 let seedCounter = 0;
+// The counter restarts in every test file, but the database is shared by the whole run, so the
+// file's own tag keeps `admin1@…` from one file apart from another's. Without it, a file that
+// seeded several times left accounts a later file's second seed collided with
+// (specs/009-fix-unprojected-records).
+const fileTag = randomBytes(4).toString('hex');
 
 export async function seedAccounts(
   app: INestApplication,
 ): Promise<{ admin: SeededAccount; guest: SeededAccount }> {
   const userModel = app.get<Model<User>>(getModelToken(User.name));
-  // Unique per call: a suite that seeds twice must get genuinely distinct accounts, or
-  // sign-in resolves the first match and the token belongs to the wrong record.
-  const n = ++seedCounter;
+  // Unique per call, across the whole run: a suite that seeds twice must get genuinely distinct
+  // accounts, or sign-in resolves the first match and the token belongs to the wrong record.
+  const n = `${fileTag}-${++seedCounter}`;
 
   const make = async (email: string, password: string, role: Role) => {
     const created = await userModel.create({

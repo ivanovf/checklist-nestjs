@@ -5,17 +5,23 @@ import { Model } from 'mongoose';
 import { CreateLockDto } from './dto/create-lock.dto';
 import { UpdateLockDto } from './dto/update-lock.dto';
 import { Lock } from './entities/lock.entity';
+import { LockResponseDto, toLockResponse } from './dto/lock-response.dto';
 
 @Injectable()
 export class LocksService {
   constructor(@InjectModel(Lock.name) private lockModel: Model<Lock>) {}
 
-  create(createLockDto: CreateLockDto) {
+  // Every answer goes through LockResponseDto, so no stored document leaves the service as it is
+  // (D3, specs/009-fix-unprojected-records).
+  async create(createLockDto: CreateLockDto): Promise<LockResponseDto> {
     const newLock = new this.lockModel(createLockDto);
-    return newLock.save();
+    return toLockResponse(await newLock.save());
   }
 
-  async update(id: string, updateLockDto: UpdateLockDto) {
+  async update(
+    id: string,
+    updateLockDto: UpdateLockDto,
+  ): Promise<LockResponseDto> {
     // Awaited before the check: an unawaited query is always truthy, so the not-found branch
     // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
     const updated = await this.lockModel
@@ -25,22 +31,28 @@ export class LocksService {
     if (!updated) {
       throw new NotFoundException(`lock #${id} not found`);
     }
-    return updated;
+    return toLockResponse(updated);
   }
 
-  findAll(limit: number, offset: number) {
+  async findAll(limit: number, offset: number): Promise<LockResponseDto[]> {
     // `_id` gives a fixed order, so consecutive pages never repeat or skip a record. It is
     // always indexed (constitution Principle V; specs/007-fix-list-paging-defaults, R5).
-    return this.lockModel.find().sort({ _id: 1 }).limit(limit).skip(offset);
+    const page = await this.lockModel
+      .find()
+      .sort({ _id: 1 })
+      .limit(limit)
+      .skip(offset)
+      .exec();
+    return page.map(toLockResponse);
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<LockResponseDto> {
     const found = await this.lockModel.findById(id).exec();
 
     if (!found) {
       throw new NotFoundException(`lock #${id} not found`);
     }
-    return found;
+    return toLockResponse(found);
   }
 
   async remove(id: string) {

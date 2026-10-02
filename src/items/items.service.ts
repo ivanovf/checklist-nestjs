@@ -5,17 +5,23 @@ import { Model } from 'mongoose';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { Item } from './entities/item.entity';
+import { ItemResponseDto, toItemResponse } from './dto/item-response.dto';
 
 @Injectable()
 export class ItemsService {
   constructor(@InjectModel(Item.name) private itemModel: Model<Item>) {}
 
-  create(createItemDto: CreateItemDto) {
+  // Every answer goes through ItemResponseDto, so no stored document leaves the service as it is
+  // (D3, specs/009-fix-unprojected-records).
+  async create(createItemDto: CreateItemDto): Promise<ItemResponseDto> {
     const newItem = new this.itemModel(createItemDto);
-    return newItem.save();
+    return toItemResponse(await newItem.save());
   }
 
-  async update(id: string, updateItemDto: UpdateItemDto) {
+  async update(
+    id: string,
+    updateItemDto: UpdateItemDto,
+  ): Promise<ItemResponseDto> {
     // Awaited before the check: an unawaited query is always truthy, so the not-found branch
     // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
     const updated = await this.itemModel
@@ -25,22 +31,28 @@ export class ItemsService {
     if (!updated) {
       throw new NotFoundException(`item #${id} not found`);
     }
-    return updated;
+    return toItemResponse(updated);
   }
 
-  findAll(limit: number, offset: number) {
+  async findAll(limit: number, offset: number): Promise<ItemResponseDto[]> {
     // `_id` gives a fixed order, so consecutive pages never repeat or skip a record. It is
     // always indexed (constitution Principle V; specs/007-fix-list-paging-defaults, R5).
-    return this.itemModel.find().sort({ _id: 1 }).limit(limit).skip(offset);
+    const page = await this.itemModel
+      .find()
+      .sort({ _id: 1 })
+      .limit(limit)
+      .skip(offset)
+      .exec();
+    return page.map(toItemResponse);
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<ItemResponseDto> {
     const found = await this.itemModel.findById(id).exec();
 
     if (!found) {
       throw new NotFoundException(`item #${id} not found`);
     }
-    return found;
+    return toItemResponse(found);
   }
 
   async remove(id: string) {

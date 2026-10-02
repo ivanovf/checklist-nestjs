@@ -1,6 +1,8 @@
+import { FieldList, project } from '../../common/projection';
+
 /**
- * Documentation only: describes the stored record exactly as the service returns it
- * (observed 2026-09-28), internal fields included (discrepancy D3). Nothing constructs it.
+ * The activity type as every operation answers it: the service projects each record through this
+ * shape, so only these fields leave it (D3, specs/009-fix-unprojected-records).
  */
 export class ActivityTypeResponseDto {
   _id: string;
@@ -14,6 +16,23 @@ export class ActivityTypeResponseDto {
   createdAt: Date;
 
   updatedAt: Date;
+}
 
-  __v: number;
+export const ACTIVITY_TYPE_RESPONSE_FIELDS: FieldList<ActivityTypeResponseDto> =
+  {
+    _id: true,
+    name: true,
+    budget: true,
+    description: true,
+    createdAt: true,
+    updatedAt: true,
+  };
+
+export function toActivityTypeResponse(
+  activityType: object,
+): ActivityTypeResponseDto {
+  return project<ActivityTypeResponseDto>(
+    activityType,
+    ACTIVITY_TYPE_RESPONSE_FIELDS,
+  );
 }

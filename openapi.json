@@ -232,6 +232,7 @@
       "put": {
         "operationId": "UsersController_update",
         "summary": "Update an account (every field is required, discrepancy D9)",
+        "description": "With `changePassword: false` the stored password is left unchanged, and `password` and `currentPassword` are ignored. With `changePassword: true`, `currentPassword` is verified and `password` becomes the new password.",
         "parameters": [
           {
             "name": "id",
@@ -2752,9 +2753,6 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
@@ -2763,8 +2761,7 @@
           "name",
           "role",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "UpdateUserDto": {
@@ -2875,9 +2872,6 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
@@ -2888,8 +2882,7 @@
           "comments",
           "category",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "UpdateItemDto": {
@@ -3052,9 +3045,6 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
@@ -3067,8 +3057,7 @@
           "quantity",
           "items",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "UpdateReservationDto": {
@@ -3145,9 +3134,6 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
@@ -3155,8 +3141,7 @@
           "lock",
           "userNumber",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "UpdateLockDto": {
@@ -3309,9 +3294,6 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
@@ -3321,8 +3303,7 @@
           "usersLimit",
           "analogLecture",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "UpdateConfigDto": {
@@ -3426,9 +3407,6 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
@@ -3438,8 +3416,7 @@
           "price",
           "date",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "ActivityTypeResponseDto": {
@@ -3464,9 +3441,6 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
@@ -3474,18 +3448,22 @@
           "name",
           "budget",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "ActivityResponseDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActivityTypeResponseDto"
+              }
+            ]
+          },
           "_id": {
             "type": "string"
-          },
-          "type": {
-            "$ref": "#/components/schemas/ActivityTypeResponseDto"
           },
           "status": {
             "enum": [
@@ -3511,20 +3489,16 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "__v": {
-            "type": "number"
           }
         },
         "required": [
-          "_id",
           "type",
+          "_id",
           "status",
           "price",
           "date",
           "createdAt",
-          "updatedAt",
-          "__v"
+          "updatedAt"
         ]
       },
       "UpdateActivityDto": {

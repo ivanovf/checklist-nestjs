@@ -72,9 +72,18 @@ the contract, this entry, and the test together.
   `_id, email, name, role, createdAt, updatedAt, __v`. No password, but internal fields
   such as `__v` are exposed
 - **Apparent intent**: responses projected through a DTO or serializer
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D3: …"
+- **Evidence**: `test/records/record-fields.e2e-spec.ts` (all 29 record-returning operations; the
+  D3 case was removed from `contract-discrepancies.e2e-spec.ts`)
 - **Principle**: II ("Mongoose documents MUST NOT be returned raw from controllers")
+- **Also found** (observed 2026-10-01): every one of the 29 operations sent `__v`, including the
+  activity type populated inside an activity, and nothing limited an answer to its published
+  fields. The hash stayed out only because the schema hides it by default. An activity whose type
+  was deleted is answered with `type: null`, which the contract described as never null.
 - **Issue**: #9
+- **Status**: Resolved by `specs/009-fix-unprojected-records` (2026-10-01). Every record answer is
+  projected through its response DTO from a compiler-checked allowlist, so `__v` is gone and a
+  field added to storage stays out until it is published. `ActivityResponseDto.type` is now
+  documented as nullable.
 
 ## D4 — Query values are bound without a typed input shape
 
@@ -249,3 +258,22 @@ the contract, this entry, and the test together.
 - **Evidence**: none yet. Recorded only; the behaviour is unchanged by 008
 - **Principle**: IV (documented response statuses, including error cases)
 - **Issue**: none yet. Open one only with the owner's approval
+
+## D17 — An account change stores the sent password as plain text ⚠️ security
+
+- **Operation(s)**: `PUT /api/users/:id`
+- **Observed** (2026-10-01, run during specs/009-fix-unprojected-records): every field is required
+  (D9), `password` included. With `changePassword: false` that value was still written, as plain
+  text, over the stored hash (`"password":"sent-pw"` in the raw record). Sign-in then refused
+  both the previous password and the value sent (401), so the account was locked out. A verified
+  change (`changePassword: true`) stored a hash correctly
+- **Apparent intent**: a change without a password change leaves the password alone, and a
+  password is only ever stored as a bcrypt hash
+- **Evidence**: `test/records/account-password.e2e-spec.ts`, `src/users/users.service.spec.ts`
+  › "update writes", and the repair in `test/records/password-repair.e2e-spec.ts`
+- **Principle**: III ("Passwords MUST be stored only as bcrypt hashes")
+- **Issue**: #28
+- **Status**: Resolved by `specs/009-fix-unprojected-records` (2026-10-01). The change writes only
+  `email`, `name` and `role`, plus the hash of a verified new password. Accounts already holding
+  plain text are repaired by `NODE_ENV=<env> pnpm db:repair-passwords` (a dry run by default,
+  then `--apply`), which hashes each value in place. Running it on production is the owner's step.

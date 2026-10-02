@@ -1,6 +1,8 @@
+import { FieldList, project } from '../../common/projection';
+
 /**
- * Documentation only: describes the stored record exactly as the service returns it
- * (observed 2026-09-28), internal fields included (discrepancy D3). Nothing constructs it.
+ * The checklist item as every operation answers it: the service projects each record through this
+ * shape, so only these fields leave it (D3, specs/009-fix-unprojected-records).
  */
 export class ItemResponseDto {
   _id: string;
@@ -20,6 +22,20 @@ export class ItemResponseDto {
   createdAt: Date;
 
   updatedAt: Date;
+}
 
-  __v: number;
+export const ITEM_RESPONSE_FIELDS: FieldList<ItemResponseDto> = {
+  _id: true,
+  label: true,
+  status: true,
+  checked: true,
+  description: true,
+  comments: true,
+  category: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
+export function toItemResponse(item: object): ItemResponseDto {
+  return project<ItemResponseDto>(item, ITEM_RESPONSE_FIELDS);
 }

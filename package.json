@@ -25,6 +25,7 @@
     "db:down": "docker compose --env-file .env.local down",
     "db:reset": "docker compose --env-file .env.local down -v",
     "db:seed": "ts-node scripts/seed-dev-admin.ts",
+    "db:repair-passwords": "ts-node scripts/repair-plain-passwords.ts",
     "db:setup": "pnpm db:up && pnpm db:seed",
     "docs:export": "nest build && node dist/src/openapi/export.js",
     "docs:check": "node dist/src/openapi/export.js --check",
