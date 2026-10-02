@@ -1693,10 +1693,34 @@
       "get": {
         "operationId": "ConfigController_findAll",
         "summary": "List device configurations",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Records to skip. Defaults to 0.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Every configuration, unpaginated (discrepancy D6).",
+            "description": "One page of configurations, oldest first.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1704,6 +1728,16 @@
                   "items": {
                     "$ref": "#/components/schemas/ConfigResponseDto"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -1960,6 +1994,29 @@
         "summary": "List activities",
         "parameters": [
           {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Records to skip. Defaults to 0.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
+            }
+          },
+          {
             "name": "type",
             "required": false,
             "in": "query",
@@ -1991,7 +2048,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Matching activities, newest first, unpaginated (discrepancy D6).",
+            "description": "One page of matching activities, newest first; activities on the same date, newest created first.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2317,10 +2374,34 @@
       "get": {
         "operationId": "ActivityTypeController_findAll",
         "summary": "List activity types",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50. Defaults to 10. A larger value is refused with 400.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Records to skip. Defaults to 0.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Every activity type, unpaginated (discrepancy D6).",
+            "description": "One page of activity types, oldest first.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2328,6 +2409,16 @@
                   "items": {
                     "$ref": "#/components/schemas/ActivityTypeResponseDto"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
                 }
               }
             }
@@ -2725,7 +2816,8 @@
           "email",
           "password",
           "name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "UserResponseDto": {
         "type": "object",
@@ -2788,6 +2880,10 @@
           },
           "currentPassword": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
         },
         "required": [
@@ -2797,7 +2893,8 @@
           "name",
           "changePassword",
           "currentPassword"
-        ]
+        ],
+        "additionalProperties": false
       },
       "DeletedResponseDto": {
         "type": "object",
@@ -2839,7 +2936,8 @@
           "status",
           "description",
           "category"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ItemResponseDto": {
         "type": "object",
@@ -2907,8 +3005,49 @@
           },
           "category": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
+      },
+      "ReservationItemDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "boolean"
+          },
+          "checked": {
+            "type": "object",
+            "default": false
+          },
+          "description": {
+            "type": "string"
+          },
+          "comments": {
+            "type": "object",
+            "default": ""
+          },
+          "category": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "The checklist entry's id; keeps it across saves."
+          }
+        },
+        "required": [
+          "label",
+          "status",
+          "description",
+          "category"
+        ],
+        "additionalProperties": false
       },
       "CreateReservationDto": {
         "type": "object",
@@ -2930,9 +3069,10 @@
           "contact": {
             "type": "string"
           },
-          "lockUser": {
+          "userLock": {
             "type": "string",
-            "description": "Accepted but currently not stored (discrepancy D15)."
+            "nullable": true,
+            "description": "The assigned lock: a lock code's user slot (e.g. 03), or a lock code's id for older reservations. Empty removes the lock."
           },
           "quantity": {
             "type": "number",
@@ -2945,7 +3085,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CreateItemDto"
+              "$ref": "#/components/schemas/ReservationItemDto"
             }
           }
         },
@@ -2957,7 +3097,8 @@
           "contact",
           "quantity",
           "items"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ReservationItemResponseDto": {
         "type": "object",
@@ -3026,6 +3167,9 @@
           "contact": {
             "type": "string"
           },
+          "userLock": {
+            "type": "string"
+          },
           "quantity": {
             "type": "number"
           },
@@ -3080,9 +3224,10 @@
           "contact": {
             "type": "string"
           },
-          "lockUser": {
+          "userLock": {
             "type": "string",
-            "description": "Accepted but currently not stored (discrepancy D15)."
+            "nullable": true,
+            "description": "The assigned lock: a lock code's user slot (e.g. 03), or a lock code's id for older reservations. Empty removes the lock."
           },
           "quantity": {
             "type": "number",
@@ -3095,10 +3240,15 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CreateItemDto"
+              "$ref": "#/components/schemas/ReservationItemDto"
             }
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CreateLockDto": {
         "type": "object",
@@ -3113,7 +3263,8 @@
         "required": [
           "lock",
           "userNumber"
-        ]
+        ],
+        "additionalProperties": false
       },
       "LockResponseDto": {
         "type": "object",
@@ -3152,8 +3303,13 @@
           },
           "userNumber": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "LoginRequestDto": {
         "type": "object",
@@ -3267,7 +3423,8 @@
           "mainLock",
           "usersLimit",
           "analogLecture"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ConfigResponseDto": {
         "type": "object",
@@ -3320,8 +3477,13 @@
           },
           "analogLecture": {
             "type": "number"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "TankLevelConfigDto": {
         "type": "object",
@@ -3334,13 +3496,18 @@
           },
           "time": {
             "type": "number"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
         },
         "required": [
           "analogLecture",
           "apiKey",
           "time"
-        ]
+        ],
+        "additionalProperties": false
       },
       "CreateActivityDto": {
         "type": "object",
@@ -3372,7 +3539,8 @@
           "status",
           "price",
           "date"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ActivityRecordResponseDto": {
         "type": "object",
@@ -3524,8 +3692,13 @@
           },
           "description": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ActivityDeletedResponseDto": {
         "type": "object",
@@ -3555,7 +3728,8 @@
         "required": [
           "name",
           "budget"
-        ]
+        ],
+        "additionalProperties": false
       },
       "UpdateActivityTypeDto": {
         "type": "object",
@@ -3569,8 +3743,13 @@
           },
           "description": {
             "type": "string"
+          },
+          "_id": {
+            "type": "string",
+            "description": "May repeat the id in the path; any other value is refused."
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }

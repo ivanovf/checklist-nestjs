@@ -38,6 +38,7 @@ export class ActivityService {
   }
 
   async findAll(filter: FilterActivityDto): Promise<ActivityResponseDto[]> {
+    // Only the filters become query conditions; `limit` and `offset` page the result.
     const query: FilterQuery<Activity> = {};
 
     if (filter.type) {
@@ -48,13 +49,20 @@ export class ActivityService {
       query.status = filter.status;
     }
 
-    if (filter.price) {
+    // Compared with undefined, not by truthiness: a price of 0 is a real filter. The handler
+    // used to get the raw string '0', which is truthy; converted, it is the falsy number 0.
+    if (filter.price !== undefined) {
       query.price = filter.price;
     }
 
+    // Newest first. Activities often share a date, so the id breaks ties: without it their
+    // order is not fixed and pages could repeat or skip them (specs/011-fix-unbounded-lists,
+    // R4). Both fields are indexed (activity.entity.ts).
     const activities = await this.activityModel
       .find(query)
-      .sort({ date: -1 })
+      .sort({ date: -1, _id: -1 })
+      .skip(filter.offset)
+      .limit(filter.limit)
       .populate('type')
       .exec();
     return activities.map(toActivityResponse);

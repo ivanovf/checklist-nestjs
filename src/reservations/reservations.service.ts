@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -13,6 +13,16 @@ import {
   ReservationResponseDto,
   toReservationResponse,
 } from './dto/reservation-response.dto';
+
+/**
+ * An empty lock (`''` or `null`) means "no lock", the app's "Ninguna": it is removed rather
+ * than stored as an empty value (specs/010-fix-unknown-fields, US3).
+ */
+function splitLock<T extends { userLock?: string | null }>(dto: T) {
+  const { userLock, ...rest } = dto;
+  const empty = userLock === '' || userLock === null;
+  return { lock: empty ? ('remove' as const) : ('keep' as const), rest };
+}
 
 @Injectable()
 export class ReservationsService {
@@ -25,7 +35,10 @@ export class ReservationsService {
   async create(
     createReservationDto: CreateReservationDto,
   ): Promise<ReservationResponseDto> {
-    const reservation = new this.reservationModel(createReservationDto);
+    const { lock, rest } = splitLock(createReservationDto);
+    const reservation = new this.reservationModel(
+      lock === 'remove' ? rest : createReservationDto,
+    );
     const checkAvailability = await this.checkAvailability(
       reservation.dateIni,
       reservation.dateEnd,
@@ -44,8 +57,19 @@ export class ReservationsService {
   ): Promise<ReservationResponseDto> {
     // Awaited before the check: an unawaited query is always truthy, so the not-found branch
     // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
+    const { lock, rest } = splitLock(updateReservationDto);
+    const change: UpdateQuery<Reservation> =
+      lock === 'remove'
+        ? {
+            // `$set` only when something else changes: whether an empty `$set` is accepted
+            // depends on the database version.
+            ...(Object.keys(rest).length > 0 && { $set: rest }),
+            $unset: { userLock: '' },
+          }
+        : { $set: updateReservationDto };
+
     const updated = await this.reservationModel
-      .findByIdAndUpdate(id, { $set: updateReservationDto }, { new: true })
+      .findByIdAndUpdate(id, change, { new: true })
       .exec();
 
     if (!updated) {

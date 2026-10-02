@@ -6,7 +6,7 @@ A NestJS + MongoDB REST API that runs a chalet's reservations and its check-in/c
 - **Node 24.x**, TypeScript 5.6 (strict), NestJS 10 on Express, Mongoose 8, MongoDB Atlas via `mongodb+srv`.
 - **pnpm 12 via Corepack** (`packageManager` pinned). npm and yarn are refused. Install scripts run only for packages allowed in `pnpm-workspace.yaml#allowBuilds`; an unlisted one fails CI.
 - **Auth**: Passport JWT + local, bcrypt. Sign-in throttling is persisted in Mongo, not memory, because serverless instances are short-lived.
-- **Hardening**: helmet, `@nestjs/throttler`, global `ValidationPipe`, joi validates env at startup. The app fails fast on bad config.
+- **Hardening**: helmet, `@nestjs/throttler`, global `RequestValidationPipe` (strict bodies and queries; a change may repeat its own `_id`), joi validates env at startup. The app fails fast on bad config.
 - **Deploy**: Vercel serverless, the only target. `src/serverless.ts` caches one app per instance (`app.init()`, never `listen()`). `api/index.js` is the shim. `outputDirectory: "public"` holds only `robots.txt`. Never set it to `.`.
 - **Config gotchas**: keep the DB name out of the URI path, or auth fails. `CORS_ORIGINS` is required in production; `none` means no browser clients (current: the Flutter app is native). Swagger (`/docs`) is served only locally.
 - All routes are under `/api`. `GET /api/health` returns 503 unless Mongo `readyState === 1`.

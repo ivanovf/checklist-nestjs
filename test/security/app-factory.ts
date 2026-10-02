@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
@@ -18,7 +18,7 @@ import { ActivityTypeModule } from '../../src/activity-type/activity-type.module
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../src/auth/guards/roles.guard';
 import { HealthModule } from '../../src/health/health.module';
-import { configureApp } from '../../src/bootstrap';
+import { applyRequestRules, configureApp } from '../../src/bootstrap';
 
 /**
  * Options for exercising the real transport setup.
@@ -82,11 +82,9 @@ export async function createTestApp(
   if (options.transport) {
     configureApp(app);
   } else {
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transformOptions: { enableImplicitConversion: true },
-      }),
-    );
+    // The same request rules the shipped app uses, not a copy that could drift from them
+    // (specs/010-fix-unknown-fields, research R8).
+    applyRequestRules(app);
     app.setGlobalPrefix('api');
   }
 

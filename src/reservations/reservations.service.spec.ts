@@ -67,6 +67,52 @@ describe('ReservationsService', () => {
   const params = (values: Partial<FilterReservationsDto>) =>
     Object.assign(new FilterReservationsDto(), values);
 
+  describe('create', () => {
+    const valid = {
+      dateIni: new Date('2031-01-01'),
+      dateEnd: new Date('2031-01-02'),
+      type: 'direct',
+      validated: false,
+      contact: 'c',
+      quantity: 1,
+      cost: 0,
+      items: [],
+    };
+    let constructed: jest.Mock;
+
+    beforeEach(async () => {
+      // `create` builds a document with `new`, so the model here is a constructor.
+      constructed = jest.fn().mockImplementation((doc: object) => ({
+        ...doc,
+        save: jest.fn().mockResolvedValue(doc),
+      }));
+      const ctor = Object.assign(constructed, {
+        exists: jest.fn().mockResolvedValue(null),
+      });
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          ReservationsService,
+          { provide: getModelToken(Reservation.name), useValue: ctor },
+        ],
+      }).compile();
+
+      service = module.get<ReservationsService>(ReservationsService);
+    });
+
+    it.each(['', null])('leaves out a lock given as %p', async (userLock) => {
+      await service.create({ ...valid, userLock });
+
+      expect(constructed).toHaveBeenCalledWith(valid);
+    });
+
+    it('stores a lock as sent', async () => {
+      await service.create({ ...valid, userLock: '03' });
+
+      expect(constructed).toHaveBeenCalledWith({ ...valid, userLock: '03' });
+    });
+  });
+
   describe('findAll', () => {
     it('reads one page from the requested position', async () => {
       await service.findAll(params({ limit: 10, offset: 20 }));
@@ -161,6 +207,50 @@ describe('ReservationsService', () => {
 
       await expect(service.update(id, {})).rejects.toThrow(
         new NotFoundException(notFound),
+      );
+    });
+
+    /**
+     * An empty lock means "no lock" (specs/010-fix-unknown-fields, US3): it is removed rather
+     * than stored as an empty value. `$set` is left out when nothing else changes, because
+     * whether an empty `$set` is accepted depends on the database version.
+     */
+    it.each(['', null])(
+      'update removes the lock when given %p',
+      async (userLock) => {
+        model.findByIdAndUpdate.mockReturnValue(resolves(record));
+
+        await service.update(id, { userLock });
+
+        expect(model.findByIdAndUpdate).toHaveBeenCalledWith(
+          id,
+          { $unset: { userLock: '' } },
+          { new: true },
+        );
+      },
+    );
+
+    it('update removes the lock and sets the other fields together', async () => {
+      model.findByIdAndUpdate.mockReturnValue(resolves(record));
+
+      await service.update(id, { userLock: '', contact: 'z' });
+
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(
+        id,
+        { $set: { contact: 'z' }, $unset: { userLock: '' } },
+        { new: true },
+      );
+    });
+
+    it('update stores a lock as sent', async () => {
+      model.findByIdAndUpdate.mockReturnValue(resolves(record));
+
+      await service.update(id, { userLock: '03', contact: 'z' });
+
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(
+        id,
+        { $set: { userLock: '03', contact: 'z' } },
+        { new: true },
       );
     });
 

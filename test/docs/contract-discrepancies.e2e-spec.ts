@@ -16,10 +16,13 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  * Not here: D1 and D4 are fixed (pinned by pagination-query.e2e-spec.ts; D1 by
  * specs/007-fix-list-paging-defaults), D2 and D7 are fixed by specs/008-fix-unknown-id-404
  * (pinned by test/records/record-ids.e2e-spec.ts), D3 is fixed by
- * specs/009-fix-unprojected-records (pinned by test/records/record-fields.e2e-spec.ts), D11 is
- * fixed by specs/006-fix-reservation-paging (pinned by
- * test/reservations/reservation-paging.e2e-spec.ts), and D14 is dead code with no behaviour to
- * run.
+ * specs/009-fix-unprojected-records (pinned by test/records/record-fields.e2e-spec.ts), D6 is
+ * fixed by specs/011-fix-unbounded-lists (pinned by pagination-query.e2e-spec.ts and
+ * test/activity/activity-paging.e2e-spec.ts), D11 is fixed by
+ * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
+ * D5 and D15 are fixed by specs/010-fix-unknown-fields (pinned by
+ * test/records/unknown-fields.e2e-spec.ts and test/reservations/reservation-lock.e2e-spec.ts),
+ * and D14 is dead code with no behaviour to run.
  */
 describe('Recorded contract discrepancies', () => {
   let app: INestApplication;
@@ -44,27 +47,6 @@ describe('Recorded contract discrepancies', () => {
   });
 
   const http = () => request(app.getHttpServer());
-
-  it('D5: an unknown body field is accepted rather than refused', async () => {
-    await http()
-      .post('/api/items')
-      .set(auth())
-      .send({ ...item, notAField: true })
-      .expect(201);
-  });
-
-  it('D6: the activity type list returns every record, with no page limit', async () => {
-    for (let i = 0; i < 12; i++) {
-      await http()
-        .post('/api/activity-type')
-        .set(auth())
-        .send({ name: `Type ${i}`, budget: i })
-        .expect(201);
-    }
-
-    const res = await http().get('/api/activity-type').set(auth()).expect(200);
-    expect(res.body.length).toBeGreaterThanOrEqual(12);
-  });
 
   it('D8: an update body with a wrongly typed field is a server error', async () => {
     const created = await http().post('/api/items').set(auth()).send(item);
@@ -132,25 +114,5 @@ describe('Recorded contract discrepancies', () => {
 
     await http().post('/api/users').set(auth()).send(account).expect(201);
     await http().post('/api/users').set(auth()).send(account).expect(201);
-  });
-
-  it('D15: a reservation accepts a lock user but does not keep it', async () => {
-    const res = await http()
-      .post('/api/reservations')
-      .set(auth())
-      .send({
-        dateIni: '2030-01-01T00:00:00.000Z',
-        dateEnd: '2030-01-02T00:00:00.000Z',
-        type: 'direct',
-        validated: false,
-        contact: 'c',
-        quantity: 1,
-        items: [],
-        lockUser: '5',
-      })
-      .expect(201);
-
-    expect(res.body).not.toHaveProperty('lockUser');
-    expect(res.body).not.toHaveProperty('userLock');
   });
 });

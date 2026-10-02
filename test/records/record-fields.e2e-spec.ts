@@ -333,12 +333,15 @@ describe('Record answers (009)', () => {
       .get(`/api/activity/${activity}`)
       .set(auth())
       .expect(200);
-    const list = await http().get('/api/activity').set(auth()).expect(200);
+    // Filtered by the deleted type, so the activity is on the first page of a paged list.
+    const list = await http()
+      .get(`/api/activity?type=${type}`)
+      .set(auth())
+      .expect(200);
 
     expect(one.body.type).toBeNull();
-    expect(
-      list.body.find((a: { _id: string }) => a._id === activity).type,
-    ).toBeNull();
+    expect(list.body).toEqual([expect.objectContaining({ _id: activity })]);
+    expect(list.body[0].type).toBeNull();
     expect(
       mismatches(successSchema('get', '/api/activity/:id'), one.body, '$'),
     ).toEqual([]);

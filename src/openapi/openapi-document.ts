@@ -1,6 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 
+import { closeRequestBodies } from './request-bodies';
+
 /**
  * Builds the OpenAPI document for the application.
  *
@@ -10,6 +12,9 @@ import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
  *
  * The global prefix is applied by the caller before this runs; paths are read from the
  * application as configured.
+ *
+ * The request rules are stated on top of what Swagger generates: validated request bodies are
+ * closed, and change bodies may repeat their own `_id` (specs/010-fix-unknown-fields).
  */
 export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
   const config = new DocumentBuilder()
@@ -21,5 +26,5 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
     .addBearerAuth()
     .build();
 
-  return SwaggerModule.createDocument(app, config);
+  return closeRequestBodies(SwaggerModule.createDocument(app, config));
 }

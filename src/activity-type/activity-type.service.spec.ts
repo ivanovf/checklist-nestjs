@@ -30,6 +30,17 @@ describe('ActivityTypeService', () => {
     `activity type #${objectId} not found`,
   );
 
+  /** A chainable query stub: each step returns the stub, and `exec` resolves `value`. */
+  const chain = (value: unknown) => {
+    const query: Record<string, jest.Mock> = {
+      exec: jest.fn().mockResolvedValue(value),
+    };
+    for (const step of ['sort', 'skip', 'limit', 'populate']) {
+      query[step] = jest.fn(() => query);
+    }
+    return query;
+  };
+
   beforeEach(async () => {
     save = jest.fn();
     model = Object.assign(
@@ -50,6 +61,22 @@ describe('ActivityTypeService', () => {
     }).compile();
 
     service = module.get<ActivityTypeService>(ActivityTypeService);
+  });
+
+  /**
+   * The list used to return the whole collection (D6, specs/011-fix-unbounded-lists).
+   */
+  describe('findAll', () => {
+    it('reads one page, oldest first', async () => {
+      const query = chain([record]);
+      model.find.mockReturnValue(query);
+
+      await expect(service.findAll(5, 10)).resolves.toEqual([record]);
+      // A total order, so consecutive pages never repeat or skip a record (R4).
+      expect(query.sort).toHaveBeenCalledWith({ _id: 1 });
+      expect(query.skip).toHaveBeenCalledWith(10);
+      expect(query.limit).toHaveBeenCalledWith(5);
+    });
   });
 
   /**
@@ -139,9 +166,9 @@ describe('ActivityTypeService', () => {
     });
 
     it('findAll', async () => {
-      model.find.mockReturnValue(resolves([stored]));
+      model.find.mockReturnValue(chain([stored]));
 
-      await expect(service.findAll()).resolves.toEqual([published]);
+      await expect(service.findAll(10, 0)).resolves.toEqual([published]);
     });
 
     it('findOne', async () => {

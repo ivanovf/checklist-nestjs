@@ -25,8 +25,18 @@ export class ActivityTypeService {
     return toActivityTypeResponse(await newActivityType.save());
   }
 
-  async findAll(): Promise<ActivityTypeResponseDto[]> {
-    const types = await this.activityTypeModel.find().exec();
+  async findAll(
+    limit: number,
+    offset: number,
+  ): Promise<ActivityTypeResponseDto[]> {
+    // `_id` gives a total order, so consecutive pages never repeat or skip a record. It is
+    // always indexed (constitution Principle V; specs/011-fix-unbounded-lists, R4).
+    const types = await this.activityTypeModel
+      .find()
+      .sort({ _id: 1 })
+      .skip(offset)
+      .limit(limit)
+      .exec();
     return types.map(toActivityTypeResponse);
   }
 

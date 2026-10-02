@@ -110,6 +110,11 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D5: …"
 - **Principle**: IV ("MUST run with `whitelist: true` and `forbidNonWhitelisted: true`")
 - **Issue**: #10
+- **Status**: Resolved by `specs/010-fix-unknown-fields` (2026-10-01). Every body and every
+  list query refuses an undeclared field or parameter with **400** `property <name> should not
+  exist`, at any depth, and passes declared values on unchanged. `_id`, `createdAt`,
+  `updatedAt` and `__v` are refused, except that a change may repeat its record's own `_id`
+  (the mobile app sends it). Pinned by `test/records/unknown-fields.e2e-spec.ts`.
 
 ## D6 — Some list routes are unbounded
 
@@ -117,10 +122,20 @@ the contract, this entry, and the test together.
 - **Observed** (2026-09-28): read from the services, `find()` with no `limit`, so the
   whole collection is returned. None of the three accepts a paging parameter
 - **Apparent intent**: paginated, with a bounded default and a hard maximum
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D6: …"
+- **Evidence**: `test/docs/pagination-query.e2e-spec.ts` (activity types and configurations)
+  and `test/activity/activity-paging.e2e-spec.ts` (activities). The D6 case was removed from
+  `contract-discrepancies.e2e-spec.ts`
 - **Principle**: V ("Every list endpoint MUST be paginated … Unbounded `find()` … is
   prohibited")
+- **Also found** (observed 2026-10-01): paging values were silently ignored rather than
+  refused (`limit=5`, `limit=0`, `limit=abc` and `offset=-1` all answered 200 with every
+  record), and activities sharing a date came back in no fixed order. The activity list
+  sorted and filtered on fields with no index. All are fixed by the same change.
 - **Issue**: #11
+- **Status**: Resolved by `specs/011-fix-unbounded-lists` (2026-10-01). All three lists page like
+  the others (`limit` 1–50 with default 10, `offset` ≥ 0 with default 0, anything else refused
+  with 400). Activities read newest first with the id as a tie-break; activity types and
+  configurations read oldest first.
 
 ## D7 — A malformed id is a server error
 
@@ -245,6 +260,11 @@ the contract, this entry, and the test together.
 - **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D15: …"
 - **Principle**: —
 - **Issue**: #20
+- **Status**: Resolved by `specs/010-fix-unknown-fields` (2026-10-01). The mobile app always
+  recorded the lock as `userLock` (a lock code's user slot, or a lock code's id in older
+  reservations), so `userLock` is now the declared field, stored and answered, and an empty
+  value removes the lock. The unused `lockUser` is refused. Pinned by
+  `test/reservations/reservation-lock.e2e-spec.ts`.
 
 ## D16 — An account password change can be refused with an undocumented 406
 

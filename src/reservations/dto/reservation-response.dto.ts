@@ -39,6 +39,9 @@ export class ReservationResponseDto {
 
   contact: string;
 
+  /** The assigned lock: a lock code's user slot (e.g. `03`), or an older reservation's lock id. */
+  userLock?: string;
+
   quantity: number;
 
   cost?: number;
@@ -70,6 +73,7 @@ export const RESERVATION_RESPONSE_FIELDS: FieldList<ReservationResponseDto> = {
   type: true,
   validated: true,
   contact: true,
+  userLock: true,
   quantity: true,
   cost: true,
   items: true,

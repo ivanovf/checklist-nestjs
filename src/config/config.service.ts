@@ -18,10 +18,17 @@ export class ConfigService {
     return toConfigResponse(await newConfig.save());
   }
 
-  // An empty list is answered as an empty list. The old `if (!conf)` tested an unawaited query,
-  // which is never falsy, so its 404 could not happen, and the contract doesn't document one.
-  async findAll(): Promise<ConfigResponseDto[]> {
-    const configs = await this.configModel.find().exec();
+  // There used to be a not-found check here. It tested the unawaited query, which is never
+  // falsy, so it could not fire; an empty list answers `[]` (specs/011-fix-unbounded-lists).
+  async findAll(limit: number, offset: number): Promise<ConfigResponseDto[]> {
+    // `_id` gives a total order, so consecutive pages never repeat or skip a record. It is
+    // always indexed (constitution Principle V; specs/011-fix-unbounded-lists, R4).
+    const configs = await this.configModel
+      .find()
+      .sort({ _id: 1 })
+      .skip(offset)
+      .limit(limit)
+      .exec();
     return configs.map(toConfigResponse);
   }
 
