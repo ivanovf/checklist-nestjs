@@ -32,6 +32,22 @@ export class User extends Document {
     default: Role.AUTHENTICATED,
   })
   role: string;
+
+  /**
+   * When the password was last set through recovery. Sessions issued before it are refused
+   * (specs/012-password-recovery, FR-013, research R6). Only recovery writes it (R13), and it is
+   * excluded from queries by default so it never reaches a user response (D3); the session
+   * check opts back in.
+   */
+  @Prop({ type: Date, select: false })
+  passwordChangedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+/**
+ * Sign-in and password recovery both look an account up by email (Principle V; research R11).
+ * Deliberately not unique: duplicate emails can already exist (D13, #18), and a unique index
+ * would fail to build over them. Making it unique belongs to the fix for D13.
+ */
+UserSchema.index({ email: 1 });

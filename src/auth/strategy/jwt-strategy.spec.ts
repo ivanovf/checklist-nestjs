@@ -51,4 +51,76 @@ describe('JwtStrategy', () => {
       }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
+
+  /**
+   * After a password recovery, sessions issued before it are refused (specs/012-password-recovery,
+   * FR-013, research R6). `iat` is in whole seconds, so a token from the same second as the
+   * recovery is accepted: otherwise the user's own sign-in straight after a reset could be
+   * refused at random.
+   */
+  describe('sessions issued before a password recovery', () => {
+    const changedAt = new Date('2026-10-01T12:00:00.500Z');
+    const changedSecond = 1790856000;
+    const payload = {
+      id: 'user-1',
+      email: 'guest@test.local',
+      role: Role.AUTHENTICATED,
+    };
+
+    const recovered = () =>
+      (usersService.findById as jest.Mock).mockResolvedValue({
+        _id: 'user-1',
+        email: 'guest@test.local',
+        role: Role.AUTHENTICATED,
+        passwordChangedAt: changedAt,
+      });
+
+    it('pins the boundary second', () => {
+      expect(Math.floor(changedAt.getTime() / 1000)).toBe(changedSecond);
+    });
+
+    it('refuses a token issued the second before', async () => {
+      recovered();
+
+      await expect(
+        strategy().validate({ ...payload, iat: changedSecond - 1 }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('accepts a token issued in the same second', async () => {
+      recovered();
+
+      await expect(
+        strategy().validate({ ...payload, iat: changedSecond }),
+      ).resolves.toMatchObject({ id: 'user-1' });
+    });
+
+    it('accepts a token issued afterwards', async () => {
+      recovered();
+
+      await expect(
+        strategy().validate({ ...payload, iat: changedSecond + 1 }),
+      ).resolves.toMatchObject({ id: 'user-1' });
+    });
+
+    it('leaves accounts that were never recovered alone', async () => {
+      (usersService.findById as jest.Mock).mockResolvedValue({
+        _id: 'user-1',
+        email: 'guest@test.local',
+        role: Role.AUTHENTICATED,
+      });
+
+      await expect(
+        strategy().validate({ ...payload, iat: 1 }),
+      ).resolves.toMatchObject({ id: 'user-1' });
+    });
+
+    it('fails closed on a token without an issue time', async () => {
+      recovered();
+
+      await expect(strategy().validate(payload)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+    });
+  });
 });

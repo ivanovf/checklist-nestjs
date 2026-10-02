@@ -74,6 +74,23 @@ export const AUTHORIZATION_MATRIX: RouteRule[] = [
   // deploy verification runs before any credential exists, and the route discloses only
   // two availability labels.
   { row: 38, method: 'get', path: '/api/health', access: 'public' },
+
+  // Rows 39–40 originate in feature 012, not the 001 contract: see
+  // specs/012-password-recovery/contracts/password-recovery.md. Issuing a recovery code is an
+  // administrator action; completing one is public by design, because its caller has lost
+  // their password and holds the code instead.
+  {
+    row: 39,
+    method: 'post',
+    path: '/api/password-recovery/:userId/code',
+    access: 'admin',
+  },
+  {
+    row: 40,
+    method: 'post',
+    path: '/api/password-recovery/complete',
+    access: 'public',
+  },
 ];
 
 /** Roles permitted to reach a route, for the authenticated cases. */

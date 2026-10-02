@@ -1624,6 +1624,134 @@
         ]
       }
     },
+    "/api/password-recovery/{userId}/code": {
+      "post": {
+        "operationId": "PasswordRecoveryController_issue",
+        "summary": "Issue a one-time password recovery code for an account",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The code, shown only here. Any earlier code for the account stops working.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryCodeResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid credentials were supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is signed in but lacks the required role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No record exists with the given identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/password-recovery/complete": {
+      "post": {
+        "operationId": "PasswordRecoveryController_complete",
+        "summary": "Set a new password with a recovery code",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteRecoveryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The password was replaced. No session is returned: sign in with the new password.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordResetResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, query or path value is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many attempts; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/api/config": {
       "post": {
         "operationId": "ConfigController_create",
@@ -3400,6 +3528,64 @@
         "required": [
           "access",
           "user"
+        ]
+      },
+      "RecoveryCodeResponseDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Six digits, as a string so leading zeros survive. Shown only in this response; pass it to the account holder.",
+            "example": "042917"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the code stops working: one hour after it was issued.",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "code",
+          "expiresAt"
+        ]
+      },
+      "CompleteRecoveryDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "description": "The account's email address, matched exactly as sign-in matches it."
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$",
+            "description": "The 6-digit recovery code an administrator issued.",
+            "example": "042917"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8,
+            "description": "The new password: at least 8 characters and at most 72 bytes (UTF-8)."
+          }
+        },
+        "required": [
+          "email",
+          "code",
+          "newPassword"
+        ],
+        "additionalProperties": false
+      },
+      "PasswordResetResponseDto": {
+        "type": "object",
+        "properties": {
+          "passwordReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "passwordReset"
         ]
       },
       "CreateConfigDto": {
