@@ -27,6 +27,9 @@ const byKey = (o: ContractOperation) => [operationKey(o), o] as const;
 
 const SIGN_IN = 'post /api/login';
 const HEALTH = 'get /api/health';
+// Throttled like sign-in; the 429 is observed in test/auth/password-recovery.e2e-spec.ts
+// (specs/012-password-recovery, FR-009).
+const COMPLETE_RECOVERY = 'post /api/password-recovery/complete';
 
 /** The access refusals each level produces, as enforced by the guards (research R5). */
 const ACCESS_REFUSALS: Record<Access, string[]> = {
@@ -112,7 +115,7 @@ describe('API contract completeness', () => {
       const allowed = (status: string) =>
         isSuccess(status) ||
         ['400', '401', '403', '404'].includes(status) ||
-        (status === '429' && key === SIGN_IN) ||
+        (status === '429' && [SIGN_IN, COMPLETE_RECOVERY].includes(key)) ||
         (status === '503' && key === HEALTH);
 
       expect(statuses(o).filter((status) => !allowed(status))).toEqual([]);
@@ -143,6 +146,7 @@ describe('API contract completeness', () => {
           'CreateLockDto',
           'CreateReservationDto',
           'CreateUserDto',
+          'CompleteRecoveryDto',
           'ReservationItemDto',
           'TankLevelConfigDto',
           'UpdateActivityDto',

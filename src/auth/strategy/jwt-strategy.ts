@@ -9,6 +9,8 @@ export interface JwtPayload {
   email: string;
   id: string;
   role: string;
+  /** Issue time in whole seconds, set by the signer. */
+  iat?: number;
 }
 
 export interface AuthenticatedUser {
@@ -42,6 +44,21 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     // The account was deleted after the token was issued.
     if (!account) {
+      throw new UnauthorizedException();
+    }
+
+    // The password was recovered after the token was issued (specs/012-password-recovery,
+    // FR-013, research R6). `iat` is in whole seconds, so a token from the same second as the
+    // recovery is accepted: otherwise a sign-in right after a reset could be refused at random.
+    // A token without `iat` fails closed. The account read above already happens on every
+    // request, so this costs nothing extra.
+    if (
+      account.passwordChangedAt &&
+      !(
+        typeof payload.iat === 'number' &&
+        payload.iat >= Math.floor(account.passwordChangedAt.getTime() / 1000)
+      )
+    ) {
       throw new UnauthorizedException();
     }
 

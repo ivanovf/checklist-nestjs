@@ -158,6 +158,70 @@ describe('UsersService', () => {
     });
   });
 
+  describe('findById', () => {
+    it('reads when the password last changed, which the session check needs', async () => {
+      const select = jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue(doc()),
+      });
+      model.findById.mockReturnValue({ select });
+
+      await service.findById('user-1');
+
+      expect(select).toHaveBeenCalledWith('+passwordChangedAt');
+    });
+  });
+
+  /**
+   * The one path that sets a password without the current one (specs/012-password-recovery,
+   * research R7). Its caller has already proved control of the account with a recovery code.
+   */
+  describe('resetPassword', () => {
+    it('stores a bcrypt hash of the new password, never the password itself', async () => {
+      model.findByIdAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(doc()),
+      });
+
+      await service.resetPassword('user-1', 'a new passphrase');
+
+      const [id, update] = model.findByIdAndUpdate.mock.calls[0];
+      expect(id).toBe('user-1');
+      expect(update.$set.password).not.toBe('a new passphrase');
+      await expect(
+        bcrypt.compare('a new passphrase', update.$set.password),
+      ).resolves.toBe(true);
+    });
+
+    it('records when, in the same update, so earlier sessions end with the old password', async () => {
+      model.findByIdAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(doc()),
+      });
+
+      await service.resetPassword('user-1', 'a new passphrase');
+
+      const [, update] = model.findByIdAndUpdate.mock.calls[0];
+      expect(update.$set.passwordChangedAt).toBeInstanceOf(Date);
+      expect(
+        Math.abs(update.$set.passwordChangedAt.getTime() - Date.now()),
+      ).toBeLessThan(1000);
+    });
+
+    it('reports whether the account still existed', async () => {
+      model.findByIdAndUpdate.mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(doc()),
+      });
+      model.findByIdAndUpdate.mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(service.resetPassword('user-1', 'pw-one-x')).resolves.toBe(
+        true,
+      );
+      await expect(service.resetPassword('gone', 'pw-two-x')).resolves.toBe(
+        false,
+      );
+    });
+  });
+
   /**
    * Every answer is projected through UserResponseDto, built from an allowlist: the stored
    * `__v`, the password hash and any unpublished field stay out, whatever the store hands
@@ -226,6 +290,59 @@ describe('UsersService', () => {
       await expect(
         service.update(id, { name: 'Guest' } as never),
       ).resolves.toEqual(published);
+    });
+  });
+
+  /**
+   * Only password recovery may set `passwordChangedAt` (specs/012-password-recovery, research
+   * R13). A client able to set it could date a password change into the future and lock that
+   * account out of every session. The request rules now refuse the field (D5,
+   * specs/010-fix-unknown-fields) and `update` writes an allowlist (D17); these pin the
+   * service on its own, so a later change to either cannot reopen it.
+   */
+  describe('passwordChangedAt is never client-written (R13)', () => {
+    const future = new Date('2099-01-01T00:00:00.000Z');
+
+    it('drops it from an update', async () => {
+      model.findByIdAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(doc()),
+      });
+
+      await service.update('user-1', {
+        name: 'Renamed',
+        passwordChangedAt: future,
+      } as never);
+
+      const [, update] = model.findByIdAndUpdate.mock.calls[0];
+      expect(update.$set).not.toHaveProperty('passwordChangedAt');
+      expect(update.$set).toHaveProperty('name', 'Renamed');
+    });
+
+    it('drops it from a new account', async () => {
+      const constructed: Record<string, unknown>[] = [];
+      const ctor = jest.fn().mockImplementation((input) => {
+        constructed.push({ ...input });
+        return { ...input, save: jest.fn().mockResolvedValue(doc()) };
+      });
+
+      const moduleRef = await Test.createTestingModule({
+        providers: [
+          UsersService,
+          { provide: getModelToken(User.name), useValue: ctor },
+        ],
+      }).compile();
+
+      await moduleRef.get<UsersService>(UsersService).create({
+        email: 'new@example.com',
+        password: 'a password',
+        name: 'New',
+        role: 'authenticated',
+        passwordChangedAt: future,
+      } as never);
+
+      expect(constructed).toHaveLength(1);
+      expect(constructed[0]).not.toHaveProperty('passwordChangedAt');
+      expect(constructed[0]).toHaveProperty('email', 'new@example.com');
     });
   });
 

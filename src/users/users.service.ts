@@ -22,7 +22,9 @@ export class UsersService {
   // stored field can reach a caller, whatever the store hands back (D3,
   // specs/009-fix-unprojected-records).
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    const newUser = new this.userModel(createUserDto);
+    const newUser = new this.userModel(
+      this.withoutRecoveryFields(createUserDto),
+    );
     const hashPassword = await bcrypt.hash(newUser.password, SALT_ROUNDS);
 
     newUser.password = hashPassword;
@@ -124,7 +126,12 @@ export class UsersService {
    * 404, and the strategy decides how to surface it.
    */
   async findById(id: string) {
-    return await this.userModel.findById(id).exec();
+    // Also reads when the password last changed: the session check refuses tokens issued
+    // before a recovery (specs/012-password-recovery, research R6).
+    return await this.userModel
+      .findById(id)
+      .select('+passwordChangedAt')
+      .exec();
   }
 
   /** Credential verification at sign-in. The only other caller that needs the hash. */
@@ -140,6 +147,44 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  /**
+   * Sets a password without asking for the current one: the only path that does
+   * (specs/012-password-recovery, research R7). Its caller must already have proved control of
+   * the account with a recovery code. Resolves whether the account still existed, so recovery
+   * can refuse a code whose account was deleted after it was issued.
+   */
+  async resetPassword(id: string, plain: string): Promise<boolean> {
+    const password = await bcrypt.hash(plain, SALT_ROUNDS);
+
+    // The timestamp is set in the same atomic update as the password, so there is no moment
+    // when the new password works and sessions opened with the old one do too.
+    const updated = await this.userModel
+      .findByIdAndUpdate(id, {
+        $set: { password, passwordChangedAt: new Date() },
+      })
+      .exec();
+
+    return updated !== null;
+  }
+
+  /**
+   * Copies client input without `passwordChangedAt`, which only password recovery may write
+   * (specs/012-password-recovery, research R13): an account able to set it could date another's
+   * password change into the future and lock it out of every session. The global request rules
+   * already refuse it, since no DTO declares it (D5, specs/010-fix-unknown-fields), and `update`
+   * writes only an allowlist (D17). `create` still builds the document from the whole body,
+   * which the rules pass on untouched, so this keeps that path safe on its own.
+   */
+  private withoutRecoveryFields<T extends object>(
+    input: T,
+  ): Omit<T, 'passwordChangedAt'> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordChangedAt, ...rest } = input as T & {
+      passwordChangedAt?: unknown;
+    };
+    return rest;
   }
 
   /** Sign-in's own result (src/auth). Answers to callers go through `toUserResponse`. */
