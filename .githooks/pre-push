@@ -4,6 +4,10 @@
 # (scripts/verify-gates.sh explains why the gates run there rather than here), and refuses
 # any push to main.
 #
+# A commit that descends from the verified one and changes only documentation since then
+# is let through without a new run: the gates never read those files (only openapi.json is
+# read, and it is not documentation here), so they would pass again unchanged.
+#
 # Bypass in an emergency with `git push --no-verify`, and say so in the PR.
 
 set -eu
@@ -11,6 +15,17 @@ set -eu
 verified_file="$(git rev-parse --git-dir)/verified-sha"
 verified=$(cat "$verified_file" 2>/dev/null || true)
 zero=0000000000000000000000000000000000000000
+
+# Markdown anywhere, plus the Spec Kit and Claude Code tooling, which no gate runs.
+docs_paths='^(specs/|\.specify/|\.claude/)|\.md$'
+
+# True when $1 descends from the verified commit and differs from it only in docs_paths.
+# --no-renames lists both sides of a rename, so moving code into a docs path still counts.
+docs_only_since_verified() {
+  [ -n "$verified" ] || return 1
+  git merge-base --is-ancestor "$verified" "$1" 2>/dev/null || return 1
+  ! git diff --no-renames --name-only "$verified" "$1" -- | grep -Eqv "$docs_paths"
+}
 
 while read -r local_ref local_sha remote_ref _remote_sha; do
   # Deleting a remote branch pushes no code.
@@ -22,10 +37,15 @@ while read -r local_ref local_sha remote_ref _remote_sha; do
     exit 1
   fi
 
-  if [ "$local_sha" != "$verified" ]; then
-    echo "pre-push: $local_ref ($local_sha) has not passed the gates. Run \`pnpm verify\`, then push again." >&2
-    exit 1
+  [ "$local_sha" = "$verified" ] && continue
+
+  if docs_only_since_verified "$local_sha"; then
+    echo "pre-push: $local_ref changes only documentation since verified $verified; pushing without a new run."
+    continue
   fi
+
+  echo "pre-push: $local_ref ($local_sha) has not passed the gates. Run \`pnpm verify\`, then push again." >&2
+  exit 1
 done
 
 exit 0

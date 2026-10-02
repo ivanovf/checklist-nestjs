@@ -22,7 +22,7 @@ pnpm lint:ci && pnpm test && pnpm test:e2e && pnpm build && pnpm docs:check && p
 ```
 - The e2e suite uses `mongodb-memory-server` and must stay `--runInBand` (one shared mongod).
 - `pnpm db:reset` wipes the local volume.
-- `pnpm verify` runs the gates on the committed HEAD: lint, unit tests with coverage, build, `docs:check` and audit (about 9 minutes on `/mnt/c`). It needs a clean tree. e2e runs only with `VERIFY_E2E=1 pnpm verify`. The `pre-push` hook in `.githooks/` refuses to push any commit that `pnpm verify` hasn't passed, and any push to `main`. `pnpm install` switches the hook on (`prepare` sets `core.hooksPath`). `git push --no-verify` bypasses it, and the PR must then say so.
+- `pnpm verify` runs the gates on the committed HEAD: lint, unit tests with coverage, build, `docs:check` and audit (about 9 minutes on `/mnt/c`). It needs a clean tree. e2e runs only with `VERIFY_E2E=1 pnpm verify`. The `pre-push` hook in `.githooks/` refuses to push any commit that `pnpm verify` hasn't passed, and any push to `main`. It lets through a commit that descends from the verified one and since then changes only `*.md`, `specs/`, `.specify/` or `.claude/`, because no gate reads those. `pnpm install` switches the hook on (`prepare` sets `core.hooksPath`). `git push --no-verify` bypasses it, and the PR must then say so.
 - `pnpm docs:export` rebuilds and writes `openapi.json`, the committed API contract. It needs no database. `pnpm docs:check` compares the current build with it; CI runs it in the Build step.
 
 ## Conventions
