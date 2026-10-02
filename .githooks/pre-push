@@ -2,7 +2,7 @@
 #
 # Refuses a push unless `pnpm verify` passed the quality gates for exactly that commit
 # (scripts/verify-gates.sh explains why the gates run there rather than here), and refuses
-# any push to main.
+# any push to main or dev.
 #
 # A commit that descends from the verified one and changes only documentation since then
 # is let through without a new run: the gates never read those files (only openapi.json is
@@ -31,11 +31,13 @@ while read -r local_ref local_sha remote_ref _remote_sha; do
   # Deleting a remote branch pushes no code.
   [ "$local_sha" = "$zero" ] && continue
 
-  # Changes reach main only by merged pull request (CLAUDE.md).
-  if [ "$remote_ref" = "refs/heads/main" ]; then
-    echo "pre-push: refusing to push to main. Open a pull request instead." >&2
-    exit 1
-  fi
+  # Changes reach dev and main only by merged pull request (CLAUDE.md).
+  case "$remote_ref" in
+    refs/heads/main | refs/heads/dev)
+      echo "pre-push: refusing to push to ${remote_ref#refs/heads/}. Open a pull request instead." >&2
+      exit 1
+      ;;
+  esac
 
   [ "$local_sha" = "$verified" ] && continue
 

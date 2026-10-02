@@ -1,6 +1,26 @@
 <!--
 Sync Impact Report
 ==================
+Version change: 1.0.1 → 1.1.0
+Bump rationale: MINOR. The branching workflow is materially expanded: `dev` becomes the
+integration branch every branch starts from and every feature PR targets, and `main` is
+reached only by a PR from `dev`.
+
+Modified sections:
+  Development Workflow & Quality Gates: gates must pass before a change merges to `dev`
+    (and so before it reaches `main`); branches start from `dev`, PRs target `dev`, and
+    `main` is updated only by a reviewed PR from `dev`; direct commits to `dev` are
+    prohibited too
+
+Added sections: none
+Removed sections: none
+Principles added or removed: none
+
+Deferred TODOs: none. `.githooks/pre-push` now refuses direct pushes to `dev` as well as
+`main`.
+
+------------------------------------------------------------------
+
 Version change: 1.0.0 → 1.0.1
 Bump rationale: PATCH. The package manager changed from npm to pnpm, and the deploy
 targets narrowed to Vercel after the Lambda, Serverless and Heroku targets were removed
@@ -184,7 +204,8 @@ in ways that are invisible locally and expensive in production.
 
 ## Development Workflow & Quality Gates
 
-The following gates MUST pass before any change merges to `main`:
+The following gates MUST pass before any change merges to `dev`, and so before it reaches
+`main`:
 
 1. `pnpm lint:ci` — clean, no rule disabled inline without a comment naming the reason.
 2. `pnpm test` — all unit specs pass and coverage thresholds from Principle I hold.
@@ -194,7 +215,9 @@ The following gates MUST pass before any change merges to `main`:
 
 Additional workflow rules:
 
-- Work happens on a branch and merges by pull request. Direct commits to `main` are
+- `dev` is the integration branch and `main` is production. Every branch starts from `dev`
+  and merges into `dev` by pull request. Once that work is approved on `dev`, it reaches
+  `main` by a pull request from `dev` to `main`. Direct commits to `main` or `dev` are
   prohibited except for the initial repository setup.
 - Every PR description MUST state which principles the change touches and MUST flag any
   deviation for reviewer attention.
@@ -229,4 +252,4 @@ than silently ignored. This constitution is reviewed at least once every six mon
 `CLAUDE.md` (when present) carries the runtime development guidance that operationalizes
 these rules for agents working in this repository.
 
-**Version**: 1.0.1 | **Ratified**: 2026-09-07 | **Last Amended**: 2026-09-26
+**Version**: 1.1.0 | **Ratified**: 2026-09-07 | **Last Amended**: 2026-10-02
