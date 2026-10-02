@@ -9,6 +9,10 @@ import { FilterReservationsDto } from '../filter_dto/filter-reservation.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { Reservation } from './entities/reservation.entity';
+import {
+  ReservationResponseDto,
+  toReservationResponse,
+} from './dto/reservation-response.dto';
 
 /**
  * An empty lock (`''` or `null`) means "no lock", the app's "Ninguna": it is removed rather
@@ -26,7 +30,11 @@ export class ReservationsService {
     @InjectModel(Reservation.name) private reservationModel: Model<Reservation>,
   ) {}
 
-  async create(createReservationDto: CreateReservationDto) {
+  // Every answer goes through ReservationResponseDto, embedded items included, so no stored
+  // document leaves the service as it is (D3, specs/009-fix-unprojected-records).
+  async create(
+    createReservationDto: CreateReservationDto,
+  ): Promise<ReservationResponseDto> {
     const { lock, rest } = splitLock(createReservationDto);
     const reservation = new this.reservationModel(
       lock === 'remove' ? rest : createReservationDto,
@@ -40,10 +48,13 @@ export class ReservationsService {
       throw new BadRequestException('Reservation not available');
     }
 
-    return reservation.save();
+    return toReservationResponse(await reservation.save());
   }
 
-  async update(id: string, updateReservationDto: UpdateReservationDto) {
+  async update(
+    id: string,
+    updateReservationDto: UpdateReservationDto,
+  ): Promise<ReservationResponseDto> {
     // Awaited before the check: an unawaited query is always truthy, so the not-found branch
     // never ran and an unknown id was answered as success (D2, specs/008-fix-unknown-id-404).
     const { lock, rest } = splitLock(updateReservationDto);
@@ -64,7 +75,7 @@ export class ReservationsService {
     if (!updated) {
       throw new NotFoundException(`reservation #${id} not found`);
     }
-    return updated;
+    return toReservationResponse(updated);
   }
 
   async remove(id: string) {
@@ -77,7 +88,9 @@ export class ReservationsService {
     return { deleted: true };
   }
 
-  findAll(params: FilterReservationsDto) {
+  async findAll(
+    params: FilterReservationsDto,
+  ): Promise<ReservationResponseDto[]> {
     const { limit, offset, sort, old, validated, dateFrom, dateTo, type } =
       params;
     const todayString = new Date().toISOString().split('T')[0];
@@ -94,20 +107,22 @@ export class ReservationsService {
     // `_id` breaks ties between reservations that start on the same day. Without it the
     // database may order them differently on each request, and paging would repeat or skip
     // them (specs/006-fix-reservation-paging, research R5).
-    return this.reservationModel
+    const page = await this.reservationModel
       .find(filter)
       .limit(limit)
       .skip(offset)
-      .sort({ dateIni: dir, _id: dir });
+      .sort({ dateIni: dir, _id: dir })
+      .exec();
+    return page.map(toReservationResponse);
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<ReservationResponseDto> {
     const found = await this.reservationModel.findById(id).exec();
 
     if (!found) {
       throw new NotFoundException(`reservation #${id} not found`);
     }
-    return found;
+    return toReservationResponse(found);
   }
 
   async checkAvailability(dateIni: Date, dateEnd: Date) {

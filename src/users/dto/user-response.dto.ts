@@ -1,8 +1,9 @@
+import { FieldList, project } from '../../common/projection';
 import { Role } from '../../auth/models/role.model';
 
 /**
- * Documentation only: describes the stored record exactly as the service returns it
- * (observed 2026-09-28), internal fields included (discrepancy D3). Nothing constructs it.
+ * The account as every operation answers it: the service projects each record through this
+ * shape, so only these fields leave it (D3, specs/009-fix-unprojected-records).
  */
 export class UserResponseDto {
   _id: string;
@@ -16,6 +17,17 @@ export class UserResponseDto {
   createdAt: Date;
 
   updatedAt: Date;
+}
 
-  __v: number;
+export const USER_RESPONSE_FIELDS: FieldList<UserResponseDto> = {
+  _id: true,
+  email: true,
+  name: true,
+  role: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
+export function toUserResponse(user: object): UserResponseDto {
+  return project<UserResponseDto>(user, USER_RESPONSE_FIELDS);
 }

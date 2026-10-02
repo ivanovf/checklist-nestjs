@@ -1,9 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 
 import { ActivityTypeService } from './activity-type.service';
 import { ActivityType } from './entities/activity-type.entity';
+import { CreateActivityTypeDto } from './dto/create-activity-type.dto';
 
 /**
  * The service takes its Mongoose model through @InjectModel, so the model token has to be
@@ -11,7 +13,13 @@ import { ActivityType } from './entities/activity-type.entity';
  */
 describe('ActivityTypeService', () => {
   let service: ActivityTypeService;
-  let model: Record<string, jest.Mock>;
+  let save: jest.Mock;
+  // Callable with `new`, as the service's `create` does, and carrying the statics it queries.
+  let model: jest.Mock &
+    Record<
+      'find' | 'findById' | 'findByIdAndUpdate' | 'findByIdAndDelete',
+      jest.Mock
+    >;
 
   const objectId = '507f1f77bcf86cd799439011';
   const record = { _id: objectId };
@@ -34,12 +42,16 @@ describe('ActivityTypeService', () => {
   };
 
   beforeEach(async () => {
-    model = {
-      findByIdAndDelete: jest.fn().mockReturnValue(resolves(record)),
-      findByIdAndUpdate: jest.fn(),
-      findById: jest.fn(),
-      find: jest.fn(),
-    };
+    save = jest.fn();
+    model = Object.assign(
+      jest.fn((dto: object) => ({ ...dto, save })),
+      {
+        findByIdAndDelete: jest.fn().mockReturnValue(resolves(record)),
+        findByIdAndUpdate: jest.fn(),
+        findById: jest.fn(),
+        find: jest.fn(),
+      },
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,7 +87,7 @@ describe('ActivityTypeService', () => {
     it('findOne answers the record', async () => {
       model.findById.mockReturnValue(resolves(record));
 
-      await expect(service.findOne(objectId)).resolves.toBe(record);
+      await expect(service.findOne(objectId)).resolves.toEqual(record);
     });
 
     it('findOne refuses an unknown id', async () => {
@@ -87,7 +99,7 @@ describe('ActivityTypeService', () => {
     it('update answers the changed record', async () => {
       model.findByIdAndUpdate.mockReturnValue(resolves(record));
 
-      await expect(service.update(objectId, {})).resolves.toBe(record);
+      await expect(service.update(objectId, {})).resolves.toEqual(record);
     });
 
     it('update refuses an unknown id', async () => {
@@ -97,7 +109,7 @@ describe('ActivityTypeService', () => {
     });
 
     it('remove answers the deleted record', async () => {
-      await expect(service.remove(objectId)).resolves.toBe(record);
+      await expect(service.remove(objectId)).resolves.toEqual(record);
     });
 
     it('remove refuses an unknown id', async () => {
@@ -126,6 +138,55 @@ describe('ActivityTypeService', () => {
       const [received] = model.findByIdAndDelete.mock.calls[0];
       expect(typeof received).toBe('string');
       expect(Number.isNaN(received as unknown as number)).toBe(false);
+    });
+  });
+
+  /**
+   * Every answer is projected through ActivityTypeResponseDto: the stored `__v` and any
+   * unpublished field stay out, an unset description stays absent, and the id is a string
+   * (D3, specs/009-fix-unprojected-records).
+   */
+  describe('answers', () => {
+    const fields = { name: 'n', budget: 1 };
+    const stored = {
+      _id: new Types.ObjectId(objectId),
+      ...fields,
+      __v: 2,
+      legacy: 'x',
+    };
+    const published = { _id: objectId, ...fields };
+
+    it('create', async () => {
+      save.mockResolvedValue(stored);
+
+      // The stored record, not this input, is what gets projected: `save` resolves `stored`.
+      await expect(
+        service.create(Object.assign(new CreateActivityTypeDto(), fields)),
+      ).resolves.toEqual(published);
+    });
+
+    it('findAll', async () => {
+      model.find.mockReturnValue(chain([stored]));
+
+      await expect(service.findAll(10, 0)).resolves.toEqual([published]);
+    });
+
+    it('findOne', async () => {
+      model.findById.mockReturnValue(resolves(stored));
+
+      await expect(service.findOne(objectId)).resolves.toEqual(published);
+    });
+
+    it('update', async () => {
+      model.findByIdAndUpdate.mockReturnValue(resolves(stored));
+
+      await expect(service.update(objectId, {})).resolves.toEqual(published);
+    });
+
+    it('remove', async () => {
+      model.findByIdAndDelete.mockReturnValue(resolves(stored));
+
+      await expect(service.remove(objectId)).resolves.toEqual(published);
     });
   });
 });

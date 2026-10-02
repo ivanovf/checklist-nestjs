@@ -1,6 +1,8 @@
+import { FieldList, project } from '../../common/projection';
+
 /**
- * Documentation only: describes the stored record exactly as the service returns it
- * (observed 2026-09-28), internal fields included (discrepancy D3). Nothing constructs it.
+ * The lock code as every operation answers it: the service projects each record through this
+ * shape, so only these fields leave it (D3, specs/009-fix-unprojected-records).
  */
 export class LockResponseDto {
   _id: string;
@@ -12,6 +14,16 @@ export class LockResponseDto {
   createdAt: Date;
 
   updatedAt: Date;
+}
 
-  __v: number;
+export const LOCK_RESPONSE_FIELDS: FieldList<LockResponseDto> = {
+  _id: true,
+  lock: true,
+  userNumber: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
+export function toLockResponse(lock: object): LockResponseDto {
+  return project<LockResponseDto>(lock, LOCK_RESPONSE_FIELDS);
 }

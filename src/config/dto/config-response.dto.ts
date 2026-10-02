@@ -1,6 +1,8 @@
+import { FieldList, project } from '../../common/projection';
+
 /**
- * Documentation only: describes the stored record exactly as the service returns it
- * (observed 2026-09-28), internal fields included (discrepancy D3). Nothing constructs it.
+ * The device configuration as every operation answers it: the service projects each record through this
+ * shape, so only these fields leave it (D3, specs/009-fix-unprojected-records).
  */
 export class ConfigResponseDto {
   _id: string;
@@ -16,6 +18,18 @@ export class ConfigResponseDto {
   createdAt: Date;
 
   updatedAt: Date;
+}
 
-  __v: number;
+export const CONFIG_RESPONSE_FIELDS: FieldList<ConfigResponseDto> = {
+  _id: true,
+  doorLock: true,
+  mainLock: true,
+  usersLimit: true,
+  analogLecture: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
+export function toConfigResponse(config: object): ConfigResponseDto {
+  return project<ConfigResponseDto>(config, CONFIG_RESPONSE_FIELDS);
 }

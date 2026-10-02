@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto, toUserResponse } from './dto/user-response.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -17,16 +18,34 @@ const SALT_ROUNDS = 10;
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(createUserDto: CreateUserDto) {
+  // Every answer goes through UserResponseDto, an allowlist, so neither the hash nor any other
+  // stored field can reach a caller, whatever the store hands back (D3,
+  // specs/009-fix-unprojected-records).
+  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const newUser = new this.userModel(createUserDto);
     const hashPassword = await bcrypt.hash(newUser.password, SALT_ROUNDS);
 
     newUser.password = hashPassword;
     const created = await newUser.save();
-    return this.skipPassword(created);
+    return toUserResponse(created);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    // Only the account's own fields are written, and the password only as the hash of a
+    // verified change. The whole DTO used to be the `$set`, so with `changePassword: false` the
+    // `password` it must carry (D9) overwrote the hash as plain text and locked the account out
+    // (D17, observed 2026-10-01, specs/009-fix-unprojected-records).
+    const { email, name, role } = updateUserDto;
+    const changes: Partial<Pick<User, 'email' | 'name' | 'role' | 'password'>> =
+      {
+        ...(email !== undefined && { email }),
+        ...(name !== undefined && { name }),
+        ...(role !== undefined && { role }),
+      };
+
     if (updateUserDto?.changePassword) {
       if (updateUserDto?.password && updateUserDto?.currentPassword) {
         // The hash is excluded from queries by default, so this path opts back in.
@@ -40,7 +59,7 @@ export class UsersService {
           throw new NotAcceptableException('The password does not match.');
         }
 
-        updateUserDto.password = await bcrypt.hash(
+        changes.password = await bcrypt.hash(
           updateUserDto.password,
           SALT_ROUNDS,
         );
@@ -52,7 +71,7 @@ export class UsersService {
     // Awaited before the check: the previous implementation tested the Query object, which is
     // always truthy, so a missing account never raised NotFoundException.
     const updated = await this.userModel
-      .findByIdAndUpdate(id, { $set: updateUserDto }, { new: true })
+      .findByIdAndUpdate(id, { $set: changes }, { new: true })
       .exec();
 
     if (!updated) {
@@ -62,7 +81,7 @@ export class UsersService {
     // Projected rather than deleted. `delete doc.password` removes only the accessor on a
     // hydrated document; the value survives in the internal document and is emitted by
     // toJSON(), which is how the hash was reaching the response.
-    return this.skipPassword(updated);
+    return toUserResponse(updated);
   }
 
   async remove(id: string) {
@@ -74,7 +93,7 @@ export class UsersService {
     return { deleted: true };
   }
 
-  async findAll(limit: number, offset: number) {
+  async findAll(limit: number, offset: number): Promise<UserResponseDto[]> {
     // `_id` gives a fixed order, so consecutive pages never repeat or skip a record. It is
     // always indexed (constitution Principle V; specs/007-fix-list-paging-defaults, R5).
     const users = await this.userModel
@@ -84,19 +103,19 @@ export class UsersService {
       .skip(offset)
       .exec();
 
-    return users.map((user) => this.skipPassword(user));
+    return users.map(toUserResponse);
   }
 
-  async findOne(id: string, skipPass = true) {
-    const user = skipPass
-      ? await this.userModel.findById(id).exec()
-      : await this.findWithPassword(id);
+  // The `skipPass = false` branch that answered the document with its hash is gone: nothing
+  // called it, and an answer path that can carry the hash is what FR-005 rules out.
+  async findOne(id: string): Promise<UserResponseDto> {
+    const user = await this.userModel.findById(id).exec();
 
     if (!user) {
       throw new NotFoundException(`user #${id} not found`);
     }
 
-    return skipPass ? this.skipPassword(user) : user;
+    return toUserResponse(user);
   }
 
   /**
@@ -123,6 +142,7 @@ export class UsersService {
     return user;
   }
 
+  /** Sign-in's own result (src/auth). Answers to callers go through `toUserResponse`. */
   skipPassword(user: User) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...obj } = user.toJSON();

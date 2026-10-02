@@ -15,8 +15,9 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  *
  * Not here: D1 and D4 are fixed (pinned by pagination-query.e2e-spec.ts; D1 by
  * specs/007-fix-list-paging-defaults), D2 and D7 are fixed by specs/008-fix-unknown-id-404
- * (pinned by test/records/record-ids.e2e-spec.ts), D6 is fixed by
- * specs/011-fix-unbounded-lists (pinned by pagination-query.e2e-spec.ts and
+ * (pinned by test/records/record-ids.e2e-spec.ts), D3 is fixed by
+ * specs/009-fix-unprojected-records (pinned by test/records/record-fields.e2e-spec.ts), D6 is
+ * fixed by specs/011-fix-unbounded-lists (pinned by pagination-query.e2e-spec.ts and
  * test/activity/activity-paging.e2e-spec.ts), D11 is fixed by
  * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
  * D5 and D15 are fixed by specs/010-fix-unknown-fields (pinned by
@@ -46,16 +47,6 @@ describe('Recorded contract discrepancies', () => {
   });
 
   const http = () => request(app.getHttpServer());
-
-  it('D3: a stored record is returned with its internal version field', async () => {
-    const res = await http()
-      .get('/api/users/all?limit=1&offset=0')
-      .set(auth())
-      .expect(200);
-
-    expect(res.body[0]).toHaveProperty('__v');
-    expect(res.body[0]).not.toHaveProperty('password');
-  });
 
   it('D8: an update body with a wrongly typed field is a server error', async () => {
     const created = await http().post('/api/items').set(auth()).send(item);
