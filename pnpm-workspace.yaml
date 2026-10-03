@@ -26,4 +26,5 @@ overrides:
 # Accepted advisories. Add one only when no patched version exists anywhere in its chain:
 # - GHSA-xxxx-xxxx-xxxx  # <package>: no patched version exists; review YYYY-MM-DD
 auditConfig:
-  ignoreGhsas: []
+  ignoreGhsas:
+    - GHSA-vfj7-8cjw-p6xm  # braces <=3.0.3, dev-only via jest's micromatch: no patched version exists; review 2026-11-03
