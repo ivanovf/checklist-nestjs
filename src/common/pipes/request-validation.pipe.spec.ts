@@ -18,6 +18,10 @@ import { PaginationQueryDto } from '../../filter_dto/pagination-query.dto';
  * the rebuilt instance would differ from today's (R2): partial item changes would reset
  * `checked` and `comments`, and `"false"` would become `true`.
  *
+ * Bodies are checked without conversion (specs/014-fix-mistyped-fields, research R2): the
+ * value checked is the value stored, so a wrongly typed field is refused, not converted for
+ * the check and then stored as sent (D8). Queries are text, so they are still converted.
+ *
  * Nested objects are only checked when the DTO marks them with `@ValidateNested` and `@Type`.
  * A nested field without both would let its contents through unchecked.
  */
@@ -88,17 +92,31 @@ describe('RequestValidationPipe', () => {
     });
 
     it('passes values on unconverted', async () => {
-      const sent = { ...item, status: 'false' };
+      // A date arrives as text and stays text: the service, not the pipe, stores it.
+      const sent = { ...item, label: '2026-01-01T00:00:00.000' };
 
       const received = await pipe.transform(sent, body(CreateItemDto));
 
       expect(received).toStrictEqual(sent);
-      expect((received as typeof sent).status).toBe('false');
     });
 
+    it.each([
+      ['status', 'false', 'status must be a boolean value'],
+      ['status', 7, 'status must be a boolean value'],
+      ['label', 7, 'label must be a string'],
+      ['label', { not: 'a string' }, 'label must be a string'],
+    ])(
+      'refuses %s = %p instead of converting it (D8)',
+      async (field, value, expected) => {
+        expect(
+          await refusal({ ...item, [field]: value }, body(CreateItemDto)),
+        ).toContain(expected);
+      },
+    );
+
     it('lists an undeclared field together with the other errors', async () => {
-      // Implicit conversion would turn a wrongly typed scalar into a valid one, so the
-      // second error is a missing required field instead.
+      // The second error is a missing required field. A wrongly typed one would be listed
+      // the same way, since bodies are not converted (D8).
       const messages = await refusal(
         { label: 'l', status: true, description: 'd', notAField: true },
         body(CreateItemDto),
@@ -123,6 +141,12 @@ describe('RequestValidationPipe', () => {
           query(FilterActivityDto),
         ),
       ).resolves.toStrictEqual({ price: '3', status: 'TODO' });
+    });
+
+    it('still converts query values to check them', async () => {
+      await expect(
+        pipe.transform({ limit: '5' }, query(PaginationQueryDto)),
+      ).resolves.toStrictEqual({ limit: '5' });
     });
 
     it('leaves defaults to the route pipe', async () => {

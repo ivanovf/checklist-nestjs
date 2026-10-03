@@ -22,19 +22,13 @@ import { seedAccounts, tokenFor } from '../support/auth-fixtures';
  * specs/006-fix-reservation-paging (pinned by test/reservations/reservation-paging.e2e-spec.ts),
  * D5 and D15 are fixed by specs/010-fix-unknown-fields (pinned by
  * test/records/unknown-fields.e2e-spec.ts and test/reservations/reservation-lock.e2e-spec.ts),
- * and D14 is dead code with no behaviour to run.
+ * D8 is fixed by specs/014-fix-mistyped-fields (pinned by test/records/field-types.e2e-spec.ts),
+ * D14 is dead code with no behaviour to run, and D16 and D18 are recorded only.
  */
 describe('Recorded contract discrepancies', () => {
   let app: INestApplication;
   let admin: string;
   const auth = () => ({ Authorization: `Bearer ${admin}` });
-
-  const item = {
-    label: 'Towels',
-    status: true,
-    description: 'd',
-    category: 'c',
-  };
 
   beforeAll(async () => {
     app = await createTestApp({ transport: true });
@@ -47,16 +41,6 @@ describe('Recorded contract discrepancies', () => {
   });
 
   const http = () => request(app.getHttpServer());
-
-  it('D8: an update body with a wrongly typed field is a server error', async () => {
-    const created = await http().post('/api/items').set(auth()).send(item);
-
-    await http()
-      .put(`/api/items/${created.body._id}`)
-      .set(auth())
-      .send({ label: { not: 'a string' } })
-      .expect(500);
-  });
 
   it('D9: updating an account with a partial body is refused', async () => {
     const created = await http()

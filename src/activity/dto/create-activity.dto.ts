@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsDate,
   IsEnum,
   IsMongoId,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { IsDateText } from '../../validators/date-text.validator';
 import { ActivityStatus } from '../entities/activity-status.enum';
 
 export class CreateActivityDto {
@@ -25,7 +25,7 @@ export class CreateActivityDto {
   @ApiProperty()
   readonly price: number;
 
-  @IsDate()
+  @IsDateText()
   @ApiProperty()
   readonly date: Date;
 

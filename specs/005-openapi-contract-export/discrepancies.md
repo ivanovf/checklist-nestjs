@@ -157,14 +157,37 @@ the contract, this entry, and the test together.
 
 ## D8 — Some invalid update bodies are server errors
 
-- **Operation(s)**: `PUT /api/items/:id`, `PUT /api/reservations/:id`
+- **Operation(s)**: recorded as `PUT /api/items/:id` and `PUT /api/reservations/:id`.
+  Corrected 2026-10-02: every operation with a validated body (16), on create **and** change,
+  including the checklist entries inside a reservation. Locks were the only kind without a
+  server error, but they accepted numbers as codes
 - **Observed** (2026-09-28): a body whose fields have the wrong type returns **500**,
   where locks, activity-type and activity return 400 for the same kind of body
 - **Apparent intent**: 400 from validation
 - **Contract**: documents 400 (which valid-typed invalid input does produce), not 500
-- **Evidence**: `test/docs/contract-discrepancies.e2e-spec.ts` › "D8: …"
+- **Evidence**: `test/records/field-types.e2e-spec.ts` (the D8 case was removed from
+  `contract-discrepancies.e2e-spec.ts`)
 - **Principle**: IV
+- **Also found** (observed 2026-10-02, during specs/014-fix-mistyped-fields):
+  - The cause was the same on every route. A body was checked after implicit conversion and
+    stored as it was sent, so the value checked was not the value stored. 49 field-and-value
+    combinations answered 500: an object for text, text or a number for a yes/no, `true` for a
+    date, and anything but a number for a reservation `cost`, which had no type check.
+  - The 2026-09-28 claim that activity types and activities answer 400 was wrong. Both
+    answered 500 for an object in a text field.
+  - Other wrongly typed values were accepted and stored converted: a number or yes/no as text
+    (`label: 7` stored `"7"`, lock codes included), `true` as `1`, a number as a date in 1970,
+    an impossible date such as 30 February (it passed the check, which reads it as a day in
+    March; derived, not run on the API), text `"false"` as `false`, and
+    `changePassword: "abc"` read as yes.
+  - A change could store `null` in a field that create requires, such as an item's label or
+    a reservation's dates.
 - **Issue**: #13
+- **Status**: Resolved by `specs/014-fix-mistyped-fields` (2026-10-02). Bodies are checked as
+  sent, never converted, so every wrongly typed field is refused with **400** naming it. Dates
+  are ISO 8601 text that is a real date, `cost` is a number, and lock codes are text. A change
+  refuses `null` for every field a create refuses it for; optional fields can still be
+  cleared. The contract was unchanged: it already declared every field's kind and 400.
 
 ## D9 — Updating a user requires every field
 
@@ -297,3 +320,15 @@ the contract, this entry, and the test together.
   `email`, `name` and `role`, plus the hash of a verified new password. Accounts already holding
   plain text are repaired by `NODE_ENV=<env> pnpm db:repair-passwords` (a dry run by default,
   then `--apply`), which hashes each value in place. Running it on production is the owner's step.
+
+## D18 — A lock code accepts text that only starts with digits
+
+- **Operation(s)**: `POST /api/locks`, `PUT /api/locks/:id`; a reservation's `userLock` reuses
+  the same rule for its user slot
+- **Observed** (2026-10-02, run on `IsDigitalNumberConstraint` during
+  specs/014-fix-mistyped-fields): `"12ab"`, `" 7"`, `"0x10"` and `"1e3"` are accepted, because
+  the rule reads the value with `parseInt` and checks only the leading number
+- **Apparent intent**: a lock code and a user slot made of digits only
+- **Evidence**: none yet. Recorded only
+- **Principle**: IV (validated input at the boundary)
+- **Issue**: none yet. Open one only with the owner's approval
