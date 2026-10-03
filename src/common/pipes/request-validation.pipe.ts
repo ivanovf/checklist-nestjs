@@ -25,12 +25,23 @@ const transformOptions = { enableImplicitConversion: true };
  * been refused. Query defaults still apply: the route-level query pipes run after this one
  * and transform the value as before.
  *
+ * Bodies are checked **without** implicit conversion (specs/014-fix-mistyped-fields, research
+ * R1–R2). Converting them checked a copy and stored the original, so an object passed as a
+ * label and failed in storage (500), and a number passed as a date and was stored as 1970
+ * (D8). JSON carries its own kinds, so a body is checked as it is. Queries are always text,
+ * so they are still converted to be checked.
+ *
  * Path parameters keep today's lenient check. They are scalars with their own pipes
  * (`ParseObjectIdPipe`), not objects that could carry unknown fields.
  */
 @Injectable()
 export class RequestValidationPipe implements PipeTransform {
-  private readonly strictPipe = new ValidationPipe({
+  private readonly bodyPipe = new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  });
+
+  private readonly queryPipe = new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
     transformOptions,
@@ -43,7 +54,8 @@ export class RequestValidationPipe implements PipeTransform {
     metadata: ArgumentMetadata,
   ): Promise<unknown> {
     if (metadata.type === 'body' || metadata.type === 'query') {
-      await this.strictPipe.transform(value, metadata);
+      const pipe = metadata.type === 'body' ? this.bodyPipe : this.queryPipe;
+      await pipe.transform(value, metadata);
       return value;
     }
     return this.argumentPipe.transform(value, metadata);

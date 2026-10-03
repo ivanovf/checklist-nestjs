@@ -3,7 +3,6 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
-  IsDate,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -13,16 +12,18 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+import { IsDateText } from '../../validators/date-text.validator';
 import { IsLockReference } from '../../validators/lock-reference.validator';
 import { ReservationItemDto } from './reservation-item.dto';
 
 export class CreateReservationDto {
-  @IsDate()
+  // Dates arrive as text and are checked as sent (D8, specs/014-fix-mistyped-fields).
+  @IsDateText()
   @IsNotEmpty()
   @ApiProperty()
   readonly dateIni: Date;
 
-  @IsDate()
+  @IsDateText()
   @IsNotEmpty()
   @ApiProperty()
   readonly dateEnd: Date;
@@ -60,6 +61,7 @@ export class CreateReservationDto {
   readonly quantity: number;
 
   @IsOptional()
+  @IsNumber()
   @ApiPropertyOptional()
   readonly cost: number;
 

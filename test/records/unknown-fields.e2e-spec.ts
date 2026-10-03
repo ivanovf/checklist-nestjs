@@ -428,14 +428,19 @@ describe('Undeclared request fields (010)', () => {
       expect((await stored(Reservation.name, id)).items[0].checked).toBe(true);
     });
 
-    it('a status sent as the text "false" is stored as false, as before', async () => {
+    // Spec 014 (FR-005, clarified 2026-10-02) refuses text for a yes/no: bodies are checked
+    // as sent (D8). The mobile app sends booleans (014 research R7).
+    it('a status sent as the text "false" is refused (014)', async () => {
+      const before = await model(Item.name).countDocuments();
+
       const res = await http()
         .post('/api/items')
         .set(auth())
         .send({ ...ITEM, status: 'false' })
-        .expect(201);
+        .expect(400);
 
-      expect((await stored(Item.name, res.body._id)).status).toBe(false);
+      expect(message(res)).toContain('status must be a boolean value');
+      expect(await model(Item.name).countDocuments()).toBe(before);
     });
   });
 
