@@ -341,14 +341,14 @@ clear (FR-007).
     - issue: none yet; open one only with the owner's approval.
 - [X] T023 [P] In `CLAUDE.md` (the **Hardening** bullet), change "strict bodies and queries" to "strict bodies and queries; bodies are checked as sent, never type-converted".
 - [X] T024 [P] Set `**Status**: Implemented` in `specs/014-fix-mistyped-fields/spec.md`, and tick the completed tasks in this file.
-- [ ] T025 Run `pnpm lint:ci`, `pnpm test --coverage` (80% overall and 90% for `src/auth`) and `pnpm test:e2e`, all green. Then commit:
+- [X] T025 Run `pnpm lint:ci`, `pnpm test --coverage` (80% overall and 90% for `src/auth`) and `pnpm test:e2e`, all green. Then commit:
   - check the branch first (never `dev` or `main`);
   - use an imperative summary and a body explaining why;
   - add the attribution trailer.
 
   Then run `VERIFY_E2E=1 pnpm verify` on the clean tree, which takes about 25 minutes.
-- [ ] T026 Run the manual checks in `specs/014-fix-mistyped-fields/quickstart.md` §2 against `pnpm start:dev`. Ask the owner to run §3 (the mobile app smoke test) on the preview deployment before `dev` is promoted to `main`.
-- [ ] T027 Open the PR against `dev` (`gh pr create --base dev`) with `Closes #13`. The PR description must state:
+- [ ] T026 *(open: neither the §2 curl checks nor the §3 app smoke test has run yet; listed in PR #34)* Run the manual checks in `specs/014-fix-mistyped-fields/quickstart.md` §2 against `pnpm start:dev`. Ask the owner to run §3 (the mobile app smoke test) on the preview deployment before `dev` is promoted to `main`.
+- [X] T027 Open the PR against `dev` (`gh pr create --base dev`) with `Closes #13`. The PR description must state:
   - the principles touched (I, IV), and that there is no deviation;
   - the in-place behaviour changes: text `"false"`, numbers as lock codes or text, `true` as
     a number, numbers as dates, impossible dates, and `null` for required fields on a change
@@ -390,3 +390,11 @@ T010 IsDateText ─┼─ then T011 pipe, T012 reservation DTO + T013 activity D
 - **Increment 3**: US3, which is six one-line DTO changes.
 - One PR for all three is the plan, since the change is small. Splitting stays possible because
   each story's block is independent.
+
+## Outcome (2026-10-03)
+
+- `59bab10`: the fix. E2E 1088/1088 across 19 suites.
+- `eebc84e`: accepts GHSA-vfj7-8cjw-p6xm (braces, dev-only via jest, no patch, review
+  2026-11-03), which started failing the audit gate on every branch. The owner approved it.
+- `pnpm verify` passed on `eebc84e`.
+- PR [#34](https://github.com/ivanovf/checklist-nestjs/pull/34) against `dev`, `Closes #13`.
